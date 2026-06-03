@@ -1,0 +1,84 @@
+# Consumo de la API — Frontend
+
+Todo el acceso al backend pasa por el composable **`useApi()`**
+([`app/composables/useApi.ts`](../app/composables/useApi.ts)). No se usa `fetch`
+directo en las páginas.
+
+## Configuración
+
+`useApi()` toma la base de `runtimeConfig.public.apiBase`:
+
+```ts
+// nuxt.config.ts
+runtimeConfig: {
+  public: {
+    apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001/api/v1',
+    googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+    institutionalDomain: process.env.NUXT_PUBLIC_INSTITUTIONAL_DOMAIN || 'undc.edu.pe',
+  },
+}
+```
+
+## Métodos disponibles
+
+| Método | Firma | Uso |
+| ------ | ----- | --- |
+| `get`    | `get<T>(path, query?)` | Lecturas; `query` se serializa como querystring |
+| `post`   | `post<T>(path, body?)` | Crear (JSON) |
+| `patch`  | `patch<T>(path, body?)`| Actualizar (JSON) |
+| `del`    | `del<T>(path)`         | Eliminar |
+| `upload` | `upload<T>(path, formData)` | `multipart/form-data` (vouchers) |
+
+Comportamiento automático:
+- Adjunta `Authorization: Bearer <token>` si hay sesión (`auth.token`).
+- En respuesta **401** llama a `auth.clearSession()` (cierra sesión).
+- `Content-Type: application/json` solo cuando hay `body` (no en `FormData`).
+
+## Ejemplos
+
+```ts
+const api = useApi()
+
+// Listar con filtros
+const disciplines = await api.get<Discipline[]>('/disciplines', {
+  eventId: 3, facultyId: 1,
+})
+
+// Crear (JSON)
+await api.post('/users', { email, fullName, role: 'STUDENT' })
+
+// Actualizar
+await api.patch(`/events/${id}`, { isOpen: false })
+
+// Eliminar
+await api.del(`/disciplines/${id}`)
+
+// Subir equipo con voucher (multipart)
+const fd = new FormData()
+fd.append('disciplineId', String(disciplineId))
+fd.append('teamName', teamName)
+fd.append('participants', JSON.stringify(participants)) // arreglo serializado
+fd.append('voucher', file)
+await api.upload('/registrations', fd)
+```
+
+## Endpoints consumidos por página (resumen)
+
+| Página | Endpoints principales |
+| ------ | --------------------- |
+| `login.vue` | `POST /auth/google` |
+| `completar-perfil.vue` | `GET /faculties`, `PATCH /auth/me/profile` |
+| `index.vue` / `eventos/` | `GET /events`, `GET /events/:id` |
+| `disciplinas/` | `GET /disciplines`, `GET /disciplines/:id` |
+| `inscripcion/[id].vue` | `GET /disciplines/:id`, `GET /academic/student`, `POST /registrations` |
+| `estado-inscripcion.vue` | `GET /registrations/mine` |
+| `admin/facultades.vue` | `GET/POST/PATCH/DELETE /faculties` y `/schools` |
+| `admin/eventos.vue` | `GET/POST/PATCH/DELETE /events` |
+| `admin/disciplinas.vue` | `GET/POST/PATCH/DELETE /disciplines` (con filtros) |
+| `admin/inscripciones.vue` | `GET /registrations`, `POST /registrations`, `PATCH /registrations/:id/approve\|reject`, `GET /disciplines`, `GET /academic/student` |
+| `admin/vouchers.vue` | `GET /vouchers`, `PATCH /vouchers/:id/validate\|reject` |
+| `admin/usuarios.vue` | `GET/POST /users`, `PATCH /users/:id`, `/users/:id/active`, `/users/:id/role` |
+| `admin/dashboard.vue` | `GET /admin/dashboard` |
+
+> El contrato completo (bodies y reglas) está en el repo del backend:
+> `backend/docs/api-contract.md`.
