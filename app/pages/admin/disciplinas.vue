@@ -22,8 +22,25 @@
           </select>
         </label>
         <label class="block">
-          <span class="text-sm text-oscuro-200">Nombre</span>
-          <input v-model="form.name" required class="input" />
+          <span class="text-sm text-oscuro-200">Deporte</span>
+          <div class="mt-1 flex items-center gap-2">
+            <span
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+              :class="getSportMeta(form.name).bg"
+            >
+              <component
+                :is="getSportMeta(form.name).icon"
+                class="h-5 w-5"
+                :class="getSportMeta(form.name).color"
+              />
+            </span>
+            <select v-model="form.name" required class="input !mt-0">
+              <option value="" disabled>Selecciona…</option>
+              <option v-for="s in SPORTS" :key="s.label" :value="s.label">
+                {{ s.label }}
+              </option>
+            </select>
+          </div>
         </label>
         <label class="block">
           <span class="text-sm text-oscuro-200">Modalidad</span>
@@ -46,6 +63,13 @@
           <select v-model="form.format" class="input">
             <option value="ELIMINATION">Eliminación</option>
             <option value="POINTS">Puntos</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-sm text-oscuro-200">Tipo de participante</span>
+          <select v-model="form.participantType" class="input">
+            <option value="STUDENT">Solo estudiantes</option>
+            <option value="OTHER">Otros (por DNI)</option>
           </select>
         </label>
         <label class="block">
@@ -125,15 +149,41 @@
       <div
         v-for="d in disciplines"
         :key="d.id"
-        class="rounded-xl border border-oscuro-700 bg-oscuro-850 p-4"
+        class="rounded-2xl border border-oscuro-700 bg-oscuro-850 p-4 transition-all hover:border-green-700/40 hover:shadow-lg hover:shadow-green-900/10"
       >
-        <div class="flex items-center justify-between">
-          <p class="font-semibold text-white">{{ d.name }}</p>
-          <span class="text-xs text-oscuro-400">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-3">
+            <span
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+              :class="getSportMeta(d.name).bg"
+            >
+              <component
+                :is="getSportMeta(d.name).icon"
+                class="h-5 w-5"
+                :class="getSportMeta(d.name).color"
+              />
+            </span>
+            <p class="truncate font-semibold text-white">{{ d.name }}</p>
+          </div>
+          <span class="shrink-0 text-xs text-oscuro-400">
             {{ d.modality === 'TEAM' ? 'Equipos' : 'Individual' }}
           </span>
         </div>
-        <p class="mt-1 text-xs text-oscuro-400">
+        <div class="mt-2 flex flex-wrap items-center gap-2">
+          <span
+            class="rounded-md px-2 py-0.5 text-[11px] font-semibold"
+            :class="
+              d.participantType === 'OTHER'
+                ? 'bg-amber-500/10 text-amber-300'
+                : 'bg-sky-500/10 text-sky-300'
+            "
+          >
+            {{
+              d.participantType === 'OTHER' ? 'Otros' : 'Solo estudiantes'
+            }}
+          </span>
+        </div>
+        <p class="mt-2 text-xs text-oscuro-400">
           {{ d.minPlayers }}-{{ d.maxPlayers }} jug. ·
           {{ d.isPaid ? formatCurrency(d.cost) : 'Gratuito' }}
         </p>
@@ -165,8 +215,25 @@
           </select>
         </label>
         <label class="block">
-          <span class="text-sm text-oscuro-200">Nombre</span>
-          <input v-model="editForm.name" required class="input" />
+          <span class="text-sm text-oscuro-200">Deporte</span>
+          <div class="mt-1 flex items-center gap-2">
+            <span
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+              :class="getSportMeta(editForm.name).bg"
+            >
+              <component
+                :is="getSportMeta(editForm.name).icon"
+                class="h-5 w-5"
+                :class="getSportMeta(editForm.name).color"
+              />
+            </span>
+            <select v-model="editForm.name" required class="input !mt-0">
+              <option value="" disabled>Selecciona…</option>
+              <option v-for="s in SPORTS" :key="s.label" :value="s.label">
+                {{ s.label }}
+              </option>
+            </select>
+          </div>
         </label>
         <label class="block">
           <span class="text-sm text-oscuro-200">Modalidad</span>
@@ -189,6 +256,13 @@
           <select v-model="editForm.format" class="input">
             <option value="ELIMINATION">Eliminación</option>
             <option value="POINTS">Puntos</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-sm text-oscuro-200">Tipo de participante</span>
+          <select v-model="editForm.participantType" class="input">
+            <option value="STUDENT">Solo estudiantes</option>
+            <option value="OTHER">Otros (por DNI)</option>
           </select>
         </label>
         <label class="block">
@@ -244,6 +318,7 @@
 <script setup lang="ts">
 import type { Discipline, SportEvent } from '~/types/domain'
 import { formatCurrency } from '~/utils/format'
+import { SPORTS, getSportMeta } from '~/utils/sports'
 
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
@@ -281,6 +356,7 @@ const form = reactive({
   modality: 'TEAM' as Discipline['modality'],
   genderPolicy: 'FREE' as Discipline['genderPolicy'],
   format: 'ELIMINATION' as Discipline['format'],
+  participantType: 'STUDENT' as Discipline['participantType'],
   registrationDeadline: '',
   minPlayers: 1,
   maxPlayers: 1,
@@ -328,6 +404,7 @@ function resetForm() {
     modality: 'TEAM',
     genderPolicy: 'FREE',
     format: 'ELIMINATION',
+    participantType: 'STUDENT',
     registrationDeadline: '',
     minPlayers: 1,
     maxPlayers: 1,
@@ -364,6 +441,7 @@ const editForm = reactive({
   modality: 'TEAM' as Discipline['modality'],
   genderPolicy: 'FREE' as Discipline['genderPolicy'],
   format: 'ELIMINATION' as Discipline['format'],
+  participantType: 'STUDENT' as Discipline['participantType'],
   registrationDeadline: '',
   minPlayers: 1,
   maxPlayers: 1,
@@ -382,6 +460,7 @@ function openEdit(d: Discipline) {
     modality: d.modality,
     genderPolicy: d.genderPolicy,
     format: d.format,
+    participantType: d.participantType,
     registrationDeadline: toDateInput(d.registrationDeadline),
     minPlayers: d.minPlayers,
     maxPlayers: d.maxPlayers,

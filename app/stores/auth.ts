@@ -81,7 +81,11 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async updateProfile(payload: { facultyId: number; schoolId: number }) {
+    async updateProfile(payload: {
+      facultyId: number
+      schoolId: number
+      dni?: string
+    }) {
       const api = useApi()
       const user = await api.patch<AuthUser>('/auth/me/profile', payload)
       this.user = user

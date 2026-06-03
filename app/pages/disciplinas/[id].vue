@@ -31,7 +31,7 @@
         <div class="rounded-lg bg-oscuro-900/60 p-3">
           <p class="text-xs text-oscuro-400">Cierre de inscripción</p>
           <p class="font-semibold text-white">
-            {{ formatDate(discipline.registrationDeadline) }}
+            {{ formatDateUtc(discipline.registrationDeadline) }}
           </p>
         </div>
       </div>
@@ -74,7 +74,7 @@
 <script setup lang="ts">
 import { ChevronLeft } from 'lucide-vue-next'
 import type { Discipline } from '~/types/domain'
-import { formatCurrency, formatDate } from '~/utils/format'
+import { formatCurrency, formatDateUtc } from '~/utils/format'
 
 const route = useRoute()
 const discipline = ref<Discipline | null>(null)

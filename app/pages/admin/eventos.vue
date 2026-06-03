@@ -65,7 +65,7 @@
         <div>
           <p class="font-semibold text-white">{{ event.name }}</p>
           <p class="text-xs text-oscuro-400">
-            {{ formatDate(event.startDate) }} — {{ formatDate(event.endDate) }}
+            {{ formatDateUtc(event.startDate) }} — {{ formatDateUtc(event.endDate) }}
           </p>
         </div>
         <div class="flex items-center gap-2">
@@ -160,7 +160,7 @@
 
 <script setup lang="ts">
 import type { SportEvent } from '~/types/domain'
-import { formatDate } from '~/utils/format'
+import { formatDateUtc } from '~/utils/format'
 
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 

@@ -10,14 +10,16 @@ Facultad de Ingeniería. Cubre dos grandes experiencias:
 - **Eventos** (`eventos/`): listado y detalle de un evento con sus disciplinas.
 - **Disciplinas** (`disciplinas/`): detalle de una disciplina y sus bases.
 - **Inscripción** (`inscripcion/[id].vue`): el delegado arma su equipo buscando
-  integrantes por DNI/código (validados contra el padrón), define delegado y
-  sube el voucher si la disciplina es pagada.
+  integrantes según el tipo de disciplina —por código contra el padrón SIVIRENO
+  (estudiantes) o por DNI contra RENIEC (externos)—, define delegado y sube el
+  voucher si la disciplina es pagada.
 - **Estado de inscripción** (`estado-inscripcion.vue`): seguimiento de los
   equipos del usuario (pendiente/aprobado/rechazado).
 - **Historial / resultados** (`historial.vue`, `resultados/`): participaciones y
   resultados del usuario.
 - **Login** (`login.vue`) con Google y **completar perfil**
-  (`completar-perfil.vue`) en el primer ingreso del estudiante.
+  (`completar-perfil.vue`) en el primer ingreso del estudiante (facultad/escuela
+  y, si el correo no trae código, su DNI para vincular inscripciones).
 - **403** (`403.vue`) para accesos no autorizados.
 
 ### Administración (layout `admin`, middleware `admin`)

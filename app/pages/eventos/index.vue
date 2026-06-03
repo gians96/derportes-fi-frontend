@@ -38,7 +38,7 @@
           {{ event.description }}
         </p>
         <p class="mt-3 text-xs text-oscuro-400">
-          {{ formatDate(event.startDate) }} — {{ formatDate(event.endDate) }}
+          {{ formatDateUtc(event.startDate) }} — {{ formatDateUtc(event.endDate) }}
         </p>
       </NuxtLink>
     </div>
@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { useEventsStore } from '~/stores/events'
-import { formatDate } from '~/utils/format'
+import { formatDateUtc } from '~/utils/format'
 
 const store = useEventsStore()
 

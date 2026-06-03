@@ -11,7 +11,8 @@
           @click="close"
         />
         <div
-          class="relative z-10 w-full max-w-lg rounded-2xl border border-oscuro-700 bg-oscuro-850 shadow-2xl"
+          class="relative z-10 w-full rounded-2xl border border-oscuro-700 bg-oscuro-850 shadow-2xl"
+          :class="sizeClass"
           role="dialog"
           aria-modal="true"
         >
@@ -26,8 +27,14 @@
               <X class="h-5 w-5" />
             </button>
           </div>
-          <div class="max-h-[70vh] overflow-y-auto px-5 py-4">
+          <div class="max-h-[80vh] overflow-y-auto px-5 py-4">
             <slot />
+          </div>
+          <div
+            v-if="$slots.footer"
+            class="border-t border-oscuro-700 px-5 py-4"
+          >
+            <slot name="footer" />
           </div>
         </div>
       </div>
@@ -36,16 +43,33 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { X } from 'lucide-vue-next'
 
-defineProps<{
-  modelValue: boolean
-  title: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    title: string
+    size?: 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl'
+  }>(),
+  { size: 'lg' },
+)
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
+
+const sizeClass = computed(
+  () =>
+    ({
+      md: 'max-w-md',
+      lg: 'max-w-lg',
+      xl: 'max-w-xl',
+      '2xl': 'max-w-2xl',
+      '4xl': 'max-w-4xl',
+      '6xl': 'max-w-6xl',
+    })[props.size],
+)
 
 function close() {
   emit('update:modelValue', false)

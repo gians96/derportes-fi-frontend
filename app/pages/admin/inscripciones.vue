@@ -1,21 +1,23 @@
 <template>
   <div>
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-3">
       <div>
         <h1 class="text-xl font-bold text-white">Inscripciones</h1>
         <p class="mt-1 text-sm text-oscuro-300">
-          Aprueba o rechaza los equipos inscritos.
+          Equipos de disciplinas <span class="text-green-300">gratuitas</span>.
+          Los de pago se gestionan en Vouchers.
         </p>
       </div>
       <button
-        class="rounded-lg bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 hover:bg-green-500/20"
+        class="shrink-0 rounded-lg bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 hover:bg-green-500/20"
         @click="openCreate"
       >
         Crear equipo
       </button>
     </div>
 
-    <div class="mt-4 flex gap-2">
+    <!-- Filtros de estado -->
+    <div class="mt-4 flex flex-wrap gap-2">
       <button
         v-for="f in filters"
         :key="f.value"
@@ -31,53 +33,186 @@
       </button>
     </div>
 
-    <div class="mt-6 space-y-3">
+    <!-- Filtros por evento / facultad / escuela / disciplina -->
+    <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <label class="block">
+        <span class="text-xs text-oscuro-400">Evento</span>
+        <select v-model.number="adv.eventId" class="input">
+          <option :value="0">Todos</option>
+          <option v-for="e in events" :key="e.id" :value="e.id">{{ e.name }}</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="text-xs text-oscuro-400">Facultad</span>
+        <select v-model.number="adv.facultyId" class="input">
+          <option :value="0">Todas</option>
+          <option v-for="f in faculties" :key="f.id" :value="f.id">{{ f.name }}</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="text-xs text-oscuro-400">Escuela profesional</span>
+        <select v-model.number="adv.schoolId" class="input">
+          <option :value="0">Todas</option>
+          <option v-for="s in filterSchools" :key="s.id" :value="s.id">{{ s.name }}</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="text-xs text-oscuro-400">Disciplina</span>
+        <select v-model.number="adv.disciplineId" class="input">
+          <option :value="0">Todas</option>
+          <option v-for="d in disciplines" :key="d.id" :value="d.id">{{ d.name }}</option>
+        </select>
+      </label>
+    </div>
+
+    <p v-if="!filtered.length" class="mt-8 text-center text-sm text-oscuro-400">
+      No hay equipos que coincidan con los filtros.
+    </p>
+
+    <!-- Tarjetas de equipos -->
+    <div class="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
       <div
         v-for="team in filtered"
         :key="team.id"
-        class="rounded-xl border border-oscuro-700 bg-oscuro-850 p-5"
+        class="flex flex-col rounded-3xl border border-oscuro-700 bg-oscuro-850 p-5 transition-all hover:border-green-700/40 hover:shadow-2xl hover:shadow-green-900/10"
       >
-        <div class="flex items-start justify-between">
-          <div>
-            <p class="font-semibold text-white">{{ team.name }}</p>
-            <p class="text-xs text-oscuro-400">
-              {{ team.disciplineName }} · {{ team.participants.length }} integrantes
-            </p>
+        <!-- Cabecera -->
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex min-w-0 items-start gap-3">
+            <span
+              class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+              :class="getSportMeta(team.discipline?.name).bg"
+            >
+              <component
+                :is="getSportMeta(team.discipline?.name).icon"
+                class="h-6 w-6"
+                :class="getSportMeta(team.discipline?.name).color"
+              />
+            </span>
+            <div class="min-w-0">
+              <p class="truncate text-lg font-bold text-white">{{ team.name }}</p>
+              <p class="truncate text-xs text-oscuro-400">
+                {{ team.discipline?.name || team.disciplineName }}
+              </p>
+            </div>
           </div>
           <StatusBadge :status="team.status" />
         </div>
 
-        <ul class="mt-3 grid gap-1 text-sm text-oscuro-300 sm:grid-cols-2">
-          <li v-for="p in team.participants" :key="p.studentCode || p.dni || p.fullName">
-            {{ p.fullName }}
-            <span v-if="p.isDelegate" class="text-green-400">(Delegado)</span>
+        <!-- Metadatos -->
+        <div class="mt-4 space-y-1.5 text-xs text-oscuro-300">
+          <p class="flex items-center gap-2">
+            <CalendarRange class="h-3.5 w-3.5 text-oscuro-500" />
+            <span class="truncate">{{ team.discipline?.event?.name || '—' }}</span>
+          </p>
+          <p class="flex items-center gap-2">
+            <Building2 class="h-3.5 w-3.5 text-oscuro-500" />
+            <span class="truncate">{{ team.discipline?.event?.faculty?.name || '—' }}</span>
+          </p>
+          <p class="flex items-center gap-2">
+            <GraduationCap class="h-3.5 w-3.5 text-oscuro-500" />
+            <span class="truncate">{{ team.discipline?.event?.school?.name || 'Todas las escuelas' }}</span>
+          </p>
+        </div>
+
+        <!-- Cuerpo: participantes + validación -->
+        <div class="my-5 flex items-center justify-between gap-4">
+          <div class="text-center">
+            <p class="text-xs text-green-400">Integrantes</p>
+            <p class="text-4xl font-bold text-green-400">{{ team.participants.length }}</p>
+          </div>
+          <div class="h-14 w-px bg-oscuro-700" />
+          <div class="flex-1 text-center">
+            <p class="text-xs text-oscuro-400">Validación de reglas</p>
+            <p
+              class="mt-1 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold"
+              :class="
+                rulesCheck(team).ok
+                  ? 'bg-green-500/10 text-green-300'
+                  : 'bg-red-500/10 text-red-300'
+              "
+            >
+              <component :is="rulesCheck(team).ok ? CheckCircle2 : AlertTriangle" class="h-3.5 w-3.5" />
+              {{ rulesCheck(team).ok ? 'Cumple' : 'Revisar' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Detalle de validación -->
+        <ul
+          v-if="rulesCheck(team).messages.length"
+          class="mb-3 space-y-1 rounded-lg bg-red-500/5 px-3 py-2 text-xs text-red-300"
+        >
+          <li v-for="m in rulesCheck(team).messages" :key="m" class="flex items-center gap-1.5">
+            <AlertTriangle class="h-3 w-3 shrink-0" />
+            {{ m }}
           </li>
         </ul>
 
+        <!-- Ver jugadores -->
+        <button
+          class="flex w-full items-center justify-between rounded-2xl border border-oscuro-700 bg-oscuro-900/50 px-4 py-2.5 text-sm font-semibold text-oscuro-300 transition-all hover:border-green-500/40 hover:text-green-300"
+          @click="openPlayers(team)"
+        >
+          <span class="flex items-center gap-2">
+            <Users class="h-4 w-4" />
+            Ver jugadores
+          </span>
+          <ChevronRight class="h-4 w-4" />
+        </button>
+
+        <!-- Acciones (solo pendientes) -->
         <div
           v-if="team.status === 'PENDING'"
-          class="mt-4 flex flex-wrap items-center gap-3"
+          class="mt-4 space-y-2 border-t border-oscuro-700 pt-4"
         >
           <button
-            class="rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-oscuro-900 hover:bg-green-400"
+            class="w-full rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-oscuro-900 hover:bg-green-400"
             @click="approve(team)"
           >
             Aprobar
           </button>
-          <input
-            v-model="reasons[team.id]"
-            placeholder="Motivo de rechazo"
-            class="flex-1 rounded-lg border border-oscuro-700 bg-oscuro-900/60 px-3 py-2 text-sm text-white"
-          />
-          <button
-            class="rounded-lg bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/25"
-            @click="reject(team)"
-          >
-            Rechazar
-          </button>
+          <div class="flex items-center gap-2">
+            <input
+              v-model="reasons[team.id]"
+              placeholder="Motivo de rechazo"
+              class="min-w-0 flex-1 rounded-lg border border-oscuro-700 bg-oscuro-900/60 px-3 py-2 text-sm text-white"
+            />
+            <button
+              class="shrink-0 rounded-lg bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/25"
+              @click="reject(team)"
+            >
+              Rechazar
+            </button>
+          </div>
         </div>
+
+        <p
+          v-else-if="team.status === 'REJECTED' && team.rejectionReason"
+          class="mt-3 rounded-lg bg-red-500/5 px-3 py-2 text-xs text-red-300"
+        >
+          Motivo: {{ team.rejectionReason }}
+        </p>
       </div>
     </div>
+
+    <!-- Modal jugadores -->
+    <AppModal v-model="playersOpen" :title="playersTeam?.name || 'Jugadores'">
+      <ul v-if="playersTeam" class="space-y-1.5 text-sm">
+        <li
+          v-for="(p, i) in playersTeam.participants"
+          :key="p.studentCode || p.dni || p.fullName"
+          class="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-white/5"
+        >
+          <span class="flex items-center gap-2 text-oscuro-100">
+            <span class="text-xs text-oscuro-500">{{ i + 1 }}.</span>
+            {{ p.fullName }}
+            <span v-if="p.isDelegate" class="text-xs text-green-400">(Delegado)</span>
+          </span>
+          <span class="font-mono text-xs text-oscuro-400">{{ p.studentCode || p.dni || '—' }}</span>
+        </li>
+      </ul>
+    </AppModal>
 
     <!-- Crear equipo manual -->
     <AppModal v-model="createOpen" title="Crear equipo manualmente">
@@ -87,9 +222,19 @@
           <select v-model.number="createForm.disciplineId" required class="input">
             <option :value="0" disabled>Selecciona…</option>
             <option v-for="d in disciplines" :key="d.id" :value="d.id">
-              {{ d.name }}{{ d.isPaid ? ` · ${formatCurrency(d.cost)}` : ' · Gratuito' }}
+              {{ d.name }} ·
+              {{ d.participantType === 'OTHER' ? 'Otros' : 'Solo estudiantes' }}
+              · {{ d.isPaid ? formatCurrency(d.cost) : 'Gratuito' }}
+              <template v-if="d.event"> · {{ d.event.name }}</template>
             </option>
           </select>
+          <span
+            v-if="!disciplines.length"
+            class="mt-1 block text-xs text-amber-400"
+          >
+            No hay disciplinas activas para el filtro seleccionado. Ajusta el
+            evento/facultad en los filtros de arriba.
+          </span>
         </label>
 
         <label class="block">
@@ -105,12 +250,22 @@
         <div class="rounded-lg border border-oscuro-700 p-3">
           <span class="text-sm font-semibold text-oscuro-200">Integrantes</span>
           <p class="mt-1 text-xs text-oscuro-400">
+            {{
+              participantMode === 'OTHER'
+                ? 'Busca por DNI (8 dígitos) en RENIEC.'
+                : 'Busca por código de estudiante en el padrón.'
+            }}
             El integrante marcado como delegado es el responsable del equipo.
           </p>
           <div class="mt-2 flex gap-2">
             <input
               v-model="participantSearch"
-              placeholder="DNI o código de estudiante"
+              :placeholder="
+                participantMode === 'OTHER'
+                  ? 'DNI (8 dígitos)'
+                  : 'Código de estudiante'
+              "
+              :inputmode="participantMode === 'OTHER' ? 'numeric' : 'text'"
               class="input flex-1"
               @keydown.enter.prevent="searchParticipant"
             />
@@ -132,6 +287,9 @@
             >
               <span>
                 {{ p.fullName }}
+                <span class="text-xs text-oscuro-400">
+                  · {{ p.studentCode || p.dni || 's/d' }}
+                </span>
                 <span v-if="p.isDelegate" class="text-green-400">(Delegado)</span>
               </span>
               <div class="flex items-center gap-3">
@@ -155,16 +313,27 @@
           </ul>
         </div>
 
-        <template v-if="selectedDiscipline?.isPaid">
+        <div
+          v-if="selectedDiscipline?.isPaid"
+          class="grid gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3"
+        >
+          <span class="text-sm font-semibold text-amber-300">
+            Comprobante de pago ({{ formatCurrency(selectedDiscipline.cost) }})
+          </span>
           <label class="block">
-            <span class="text-sm text-oscuro-200">Número de operación</span>
+            <span class="text-xs text-oscuro-300">N° de operación</span>
             <input v-model="createForm.operationNumber" class="input" />
           </label>
           <label class="block">
-            <span class="text-sm text-oscuro-200">Comprobante de pago</span>
-            <input type="file" accept="image/*" class="input" @change="onVoucher" />
+            <span class="text-xs text-oscuro-300">Imagen del voucher</span>
+            <input
+              type="file"
+              accept="image/*"
+              class="input"
+              @change="onVoucher"
+            />
           </label>
-        </template>
+        </div>
 
         <p v-if="modalError" class="text-sm text-red-400">{{ modalError }}</p>
         <button
@@ -180,14 +349,25 @@
 </template>
 
 <script setup lang="ts">
+import {
+  AlertTriangle,
+  Building2,
+  CalendarRange,
+  CheckCircle2,
+  ChevronRight,
+  GraduationCap,
+  Users,
+} from 'lucide-vue-next'
 import type {
   AcademicStudent,
   Discipline,
   Participant,
   RegistrationStatus,
+  SportEvent,
   Team,
 } from '~/types/domain'
 import { formatCurrency } from '~/utils/format'
+import { getSportMeta } from '~/utils/sports'
 
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
@@ -195,6 +375,35 @@ const api = useApi()
 const teams = ref<Team[]>([])
 const reasons = reactive<Record<number, string>>({})
 const filter = ref<RegistrationStatus | 'ALL'>('PENDING')
+
+const events = ref<SportEvent[]>([])
+const { faculties, load: loadFaculties } = useFaculties()
+
+const adv = reactive({
+  eventId: 0,
+  facultyId: 0,
+  schoolId: 0,
+  disciplineId: 0,
+})
+
+const filterSchools = computed(
+  () => faculties.value.find((f) => f.id === adv.facultyId)?.schools ?? [],
+)
+
+watch(
+  () => adv.facultyId,
+  () => {
+    adv.schoolId = 0
+  },
+)
+
+watch(
+  () => [adv.eventId, adv.facultyId, adv.schoolId, adv.disciplineId],
+  () => {
+    loadTeams()
+    loadDisciplines()
+  },
+)
 
 const filters: { label: string; value: RegistrationStatus | 'ALL' }[] = [
   { label: 'Pendientes', value: 'PENDING' },
@@ -209,9 +418,56 @@ const filtered = computed(() =>
     : teams.value.filter((t) => t.status === filter.value),
 )
 
+function rulesCheck(team: Team): { ok: boolean; messages: string[] } {
+  const messages: string[] = []
+  const d = team.discipline
+  const count = team.participants.length
+  if (d) {
+    if (count < d.minPlayers)
+      messages.push(`Mínimo ${d.minPlayers} integrantes (tiene ${count}).`)
+    if (count > d.maxPlayers)
+      messages.push(`Máximo ${d.maxPlayers} integrantes (tiene ${count}).`)
+    if (d.genderPolicy === 'MALE' && team.participants.some((p) => p.gender === 'F'))
+      messages.push('La disciplina es solo varones.')
+    if (d.genderPolicy === 'FEMALE' && team.participants.some((p) => p.gender === 'M'))
+      messages.push('La disciplina es solo mujeres.')
+  }
+  const hasDelegate = team.participants.some((p) => p.isDelegate)
+  if (!hasDelegate) messages.push('Falta designar un delegado.')
+  return { ok: messages.length === 0, messages }
+}
+
+async function loadTeams() {
+  // En esta vista solo se gestionan equipos de disciplinas gratuitas.
+  // Los equipos de pago se validan en la sección de Vouchers.
+  const query: Record<string, number | boolean> = { isPaid: false }
+  if (adv.eventId) query.eventId = adv.eventId
+  if (adv.facultyId) query.facultyId = adv.facultyId
+  if (adv.schoolId) query.schoolId = adv.schoolId
+  if (adv.disciplineId) query.disciplineId = adv.disciplineId
+  try {
+    teams.value = await api.get<Team[]>('/registrations', query)
+  } catch {
+    teams.value = []
+  }
+}
+
+async function loadDisciplines() {
+  const query: Record<string, number> = {}
+  if (adv.eventId) query.eventId = adv.eventId
+  if (adv.facultyId) query.facultyId = adv.facultyId
+  if (adv.schoolId) query.schoolId = adv.schoolId
+  try {
+    disciplines.value = await api.get<Discipline[]>('/disciplines', query)
+  } catch {
+    disciplines.value = []
+  }
+}
+
 async function load() {
   try {
-    teams.value = await api.get<Team[]>('/registrations')
+    events.value = await api.get<SportEvent[]>('/events')
+    await Promise.all([loadFaculties(), loadDisciplines(), loadTeams()])
   } catch {
     teams.value = []
   }
@@ -219,14 +475,22 @@ async function load() {
 
 async function approve(team: Team) {
   await api.patch(`/registrations/${team.id}/approve`, {})
-  await load()
+  await loadTeams()
 }
 
 async function reject(team: Team) {
   const reason = reasons[team.id]?.trim()
   if (!reason) return
   await api.patch(`/registrations/${team.id}/reject`, { reason })
-  await load()
+  await loadTeams()
+}
+
+// --- Modal de jugadores ---
+const playersOpen = ref(false)
+const playersTeam = ref<Team | null>(null)
+function openPlayers(team: Team) {
+  playersTeam.value = team
+  playersOpen.value = true
 }
 
 // --- Crear equipo manual ---
@@ -249,6 +513,10 @@ const createForm = reactive({
 
 const selectedDiscipline = computed(() =>
   disciplines.value.find((d) => d.id === createForm.disciplineId),
+)
+
+const participantMode = computed<'STUDENT' | 'OTHER'>(
+  () => selectedDiscipline.value?.participantType ?? 'STUDENT',
 )
 
 function setDelegate(index: number) {
@@ -282,37 +550,51 @@ async function openCreate() {
   })
   participantSearch.value = ''
   createOpen.value = true
+  // Las disciplinas ya vienen filtradas por el evento/facultad seleccionados.
   if (!disciplines.value.length) {
-    try {
-      disciplines.value = await api.get<Discipline[]>('/disciplines')
-    } catch {
-      disciplines.value = []
-    }
+    await loadDisciplines()
   }
 }
 
 async function searchParticipant() {
   const q = participantSearch.value.trim()
   if (!q) return
+  if (!createForm.disciplineId) {
+    participantError.value = 'Primero selecciona una disciplina.'
+    return
+  }
   searching.value = true
   participantError.value = ''
   try {
-    const student = await api.get<AcademicStudent>('/academic/student', {
-      buscador: q,
-    })
-    const dni = /^\d{8}$/.test(q) ? q : null
+    let person: AcademicStudent
+    if (participantMode.value === 'OTHER') {
+      if (!/^\d{8}$/.test(q)) {
+        participantError.value = 'Ingresa un DNI válido de 8 dígitos.'
+        return
+      }
+      person = await api.get<AcademicStudent>('/academic/dni', { numero: q })
+    } else {
+      person = await api.get<AcademicStudent>('/academic/student', {
+        buscador: q,
+      })
+    }
+    const code = person.studentCode?.trim() || null
+    const dni = person.dni?.trim() || (/^\d{8}$/.test(q) ? q : null)
     const already = createForm.participants.some(
       (p) =>
-        (student.codEstu && p.studentCode === student.codEstu) ||
-        (dni && p.dni === dni),
+        (code && p.studentCode === code) ||
+        (dni && p.dni === dni) ||
+        (p.fullName.toLowerCase() === person.fullName.toLowerCase() &&
+          (!code || !p.studentCode) &&
+          (!dni || !p.dni)),
     )
     if (already) {
-      participantError.value = 'Ese estudiante ya fue agregado.'
+      participantError.value = 'Esa persona ya fue agregada.'
       return
     }
     createForm.participants.push({
-      fullName: student.estudiante.replace(/\s+/g, ' ').trim(),
-      studentCode: student.codEstu,
+      fullName: person.fullName.replace(/\s+/g, ' ').trim(),
+      studentCode: code,
       dni,
       gender: 'O',
       isDelegate: createForm.participants.length === 0,
@@ -320,7 +602,9 @@ async function searchParticipant() {
     participantSearch.value = ''
   } catch {
     participantError.value =
-      'No se encontró un estudiante único con ese DNI/código.'
+      participantMode.value === 'OTHER'
+        ? 'No se encontró una persona con ese DNI.'
+        : 'No se encontró un estudiante único con ese código.'
   } finally {
     searching.value = false
   }
@@ -337,7 +621,8 @@ async function submitCreate() {
     return
   }
   if (selectedDiscipline.value?.isPaid && !createForm.voucherFile) {
-    modalError.value = 'Esta disciplina requiere adjuntar el comprobante de pago.'
+    modalError.value =
+      'Esta disciplina tiene costo: adjunta el comprobante de pago.'
     return
   }
   submitting.value = true
@@ -353,7 +638,7 @@ async function submitCreate() {
     }
     await api.upload('/registrations', fd)
     createOpen.value = false
-    await load()
+    await loadTeams()
   } catch (err) {
     modalError.value =
       (err as { data?: { message?: string | string[] } })?.data?.message?.toString() ??

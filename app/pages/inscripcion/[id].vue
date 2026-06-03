@@ -42,12 +42,21 @@
 
         <div class="flex flex-wrap items-end gap-3">
           <label class="flex-1">
-            <span class="text-sm text-oscuro-200">Buscar por DNI o código</span>
+            <span class="text-sm text-oscuro-200">
+              {{
+                participantMode === 'OTHER'
+                  ? 'Buscar por DNI'
+                  : 'Buscar por código de estudiante'
+              }}
+            </span>
             <input
               v-model="search"
               type="text"
+              :inputmode="participantMode === 'OTHER' ? 'numeric' : 'text'"
               class="input"
-              placeholder="Ej. 2301010149"
+              :placeholder="
+                participantMode === 'OTHER' ? 'Ej. 71234567' : 'Ej. 2301010149'
+              "
             />
           </label>
           <button
@@ -157,6 +166,10 @@ const submitting = ref(false)
 const error = ref('')
 const success = ref('')
 
+const participantMode = computed<'STUDENT' | 'OTHER'>(
+  () => discipline.value?.participantType ?? 'STUDENT',
+)
+
 const form = reactive({
   teamName: '',
   phone: '',
@@ -174,27 +187,41 @@ onMounted(async () => {
 })
 
 async function searchStudent() {
-  if (!search.value.trim()) return
+  const q = search.value.trim()
+  if (!q) return
   searching.value = true
   searchError.value = ''
   try {
-    // El backend solo devuelve datos cuando hay exactamente un resultado
-    const student = await api.get<AcademicStudent>('/academic/student', {
-      buscador: search.value.trim(),
-    })
-    const dni = /^\d{8}$/.test(search.value) ? search.value : null
+    let person: AcademicStudent
+    if (participantMode.value === 'OTHER') {
+      if (!/^\d{8}$/.test(q)) {
+        searchError.value = 'Ingresa un DNI válido de 8 dígitos.'
+        return
+      }
+      person = await api.get<AcademicStudent>('/academic/dni', { numero: q })
+    } else {
+      // El backend solo devuelve datos cuando hay exactamente un resultado
+      person = await api.get<AcademicStudent>('/academic/student', {
+        buscador: q,
+      })
+    }
+    const code = person.studentCode?.trim() || null
+    const dni = person.dni?.trim() || (/^\d{8}$/.test(q) ? q : null)
     const already = form.participants.some(
       (p) =>
-        (student.codEstu && p.studentCode === student.codEstu) ||
-        (dni && p.dni === dni),
+        (code && p.studentCode === code) ||
+        (dni && p.dni === dni) ||
+        (p.fullName.toLowerCase() === person.fullName.toLowerCase() &&
+          (!code || !p.studentCode) &&
+          (!dni || !p.dni)),
     )
     if (already) {
-      searchError.value = 'Ese estudiante ya fue agregado.'
+      searchError.value = 'Esa persona ya fue agregada.'
       return
     }
     form.participants.push({
-      fullName: student.estudiante.replace(/\s+/g, ' ').trim(),
-      studentCode: student.codEstu,
+      fullName: person.fullName.replace(/\s+/g, ' ').trim(),
+      studentCode: code,
       dni,
       gender: 'O',
       isDelegate: form.participants.length === 0,
@@ -202,7 +229,9 @@ async function searchStudent() {
     search.value = ''
   } catch {
     searchError.value =
-      'No se encontró un estudiante único con ese DNI/código.'
+      participantMode.value === 'OTHER'
+        ? 'No se encontró una persona con ese DNI.'
+        : 'No se encontró un estudiante único con ese código.'
   } finally {
     searching.value = false
   }

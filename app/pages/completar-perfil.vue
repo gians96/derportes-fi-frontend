@@ -41,6 +41,23 @@
           </select>
         </label>
 
+        <label v-if="needsDni" class="block">
+          <span class="text-sm text-oscuro-200">DNI</span>
+          <input
+            v-model="form.dni"
+            type="text"
+            inputmode="numeric"
+            maxlength="8"
+            required
+            placeholder="8 dígitos"
+            class="input"
+          />
+          <span class="mt-1 block text-xs text-oscuro-400">
+            Tu correo no corresponde a un código de estudiante. Ingresa tu DNI
+            para vincular tus inscripciones.
+          </span>
+        </label>
+
         <p v-if="error" class="text-sm text-red-400">{{ error }}</p>
 
         <button
@@ -67,9 +84,15 @@ const { faculties, load } = useFaculties()
 const form = reactive({
   facultyId: auth.user?.facultyId ?? 0,
   schoolId: auth.user?.schoolId ?? 0,
+  dni: auth.user?.dni ?? '',
 })
 const error = ref('')
 const saving = ref(false)
+
+// Pedimos DNI cuando el correo no es un código de estudiante (sin studentCode).
+const needsDni = computed(
+  () => auth.user?.role === 'STUDENT' && !auth.user?.studentCode,
+)
 
 const schoolsOfFaculty = computed(
   () => faculties.value.find((f) => f.id === form.facultyId)?.schools ?? [],
@@ -88,11 +111,16 @@ async function save() {
     error.value = 'Selecciona facultad y escuela'
     return
   }
+  if (needsDni.value && !/^\d{8}$/.test(form.dni)) {
+    error.value = 'Ingresa un DNI válido de 8 dígitos'
+    return
+  }
   saving.value = true
   try {
     await auth.updateProfile({
       facultyId: form.facultyId,
       schoolId: form.schoolId,
+      ...(needsDni.value ? { dni: form.dni } : {}),
     })
     await navigateTo(auth.isAdmin ? '/admin/dashboard' : '/')
   } catch (err: unknown) {

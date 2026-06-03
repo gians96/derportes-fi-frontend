@@ -10,6 +10,8 @@ export type GenderPolicy = 'MALE' | 'FEMALE' | 'MIXED' | 'FREE'
 
 export type CompetitionFormat = 'ELIMINATION' | 'POINTS'
 
+export type ParticipantType = 'STUDENT' | 'OTHER'
+
 export type RegistrationStatus =
   | 'PENDING'
   | 'APPROVED'
@@ -70,6 +72,7 @@ export interface Discipline {
   modality: DisciplineModality
   genderPolicy: GenderPolicy
   format: CompetitionFormat
+  participantType: ParticipantType
   minPlayers: number
   maxPlayers: number
   maxTeams: number
@@ -79,6 +82,7 @@ export interface Discipline {
   extraInfo?: string | null
   registrationDeadline: string
   teamsCount?: number
+  event?: { id: number; name: string }
 }
 
 export interface Participant {
@@ -88,6 +92,26 @@ export interface Participant {
   dni?: string | null
   gender: Gender
   isDelegate: boolean
+  userId?: number | null
+}
+
+export interface TeamDisciplineEvent {
+  id: number
+  name: string
+  faculty?: { id: number; name: string } | null
+  school?: { id: number; name: string } | null
+}
+
+export interface TeamDiscipline {
+  id: number
+  name: string
+  isPaid: boolean
+  cost: number
+  participantType?: ParticipantType
+  minPlayers: number
+  maxPlayers: number
+  genderPolicy: GenderPolicy
+  event: TeamDisciplineEvent
 }
 
 export interface Team {
@@ -95,10 +119,13 @@ export interface Team {
   name: string
   disciplineId: number
   disciplineName?: string
+  discipline?: TeamDiscipline
   delegateId: number
+  phone?: string | null
   status: RegistrationStatus
   rejectionReason?: string | null
   participants: Participant[]
+  voucher?: Voucher | null
   createdAt: string
 }
 
@@ -106,12 +133,23 @@ export interface Voucher {
   id: number
   teamId: number
   teamName?: string
+  phone?: string | null
   operationNumber: string
   amount: number
   imageUrl: string
   status: VoucherStatus
   rejectionReason?: string | null
   uploadedAt: string
+  disciplineName?: string
+  participantType?: ParticipantType
+  minPlayers?: number
+  maxPlayers?: number
+  genderPolicy?: GenderPolicy
+  eventName?: string
+  facultyName?: string
+  schoolName?: string
+  participantsCount?: number
+  participants?: Participant[]
 }
 
 export interface StandingRow {
@@ -126,9 +164,7 @@ export interface StandingRow {
 }
 
 export interface AcademicStudent {
-  idEstu: string
-  nivel: string
-  codEstu: string
-  estudiante: string
-  egreso: string | null
+  fullName: string
+  studentCode: string | null
+  dni: string | null
 }

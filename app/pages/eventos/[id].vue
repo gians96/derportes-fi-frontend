@@ -26,7 +26,7 @@
           </span>
         </div>
         <p class="mt-3 text-sm text-oscuro-400">
-          {{ formatDate(event.startDate) }} — {{ formatDate(event.endDate) }}
+          {{ formatDateUtc(event.startDate) }} — {{ formatDateUtc(event.endDate) }}
         </p>
       </div>
 
@@ -57,7 +57,7 @@
 import { ChevronLeft } from 'lucide-vue-next'
 import type { SportEvent } from '~/types/domain'
 import { useEventsStore } from '~/stores/events'
-import { formatDate } from '~/utils/format'
+import { formatDateUtc } from '~/utils/format'
 
 const route = useRoute()
 const store = useEventsStore()
