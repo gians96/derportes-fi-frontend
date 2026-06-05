@@ -41,23 +41,6 @@
           </p>
         </div>
       </div>
-
-      <div v-if="discipline.rulesText" class="mt-6">
-        <h3 class="text-sm font-semibold text-oscuro-200">Bases</h3>
-        <p class="mt-1 whitespace-pre-line text-sm text-oscuro-300">
-          {{ discipline.rulesText }}
-        </p>
-      </div>
-
-      <div v-if="discipline.extraInfo" class="mt-4">
-        <h3 class="text-sm font-semibold text-oscuro-200">
-          Información adicional
-        </h3>
-        <p class="mt-1 whitespace-pre-line text-sm text-oscuro-300">
-          {{ discipline.extraInfo }}
-        </p>
-      </div>
-
       <div class="mt-6 flex flex-wrap gap-3">
         <NuxtLink
           v-if="!auth.user"
@@ -86,6 +69,19 @@
           Ver resultados
         </NuxtLink>
       </div>
+      <div v-if="discipline.rulesText" class="mt-6">
+        <h3 class="text-sm font-semibold text-oscuro-200">Bases</h3>
+        <RichTextContent class="mt-1" :content="discipline.rulesText" />
+      </div>
+
+      <div v-if="discipline.extraInfo" class="mt-4">
+        <h3 class="text-sm font-semibold text-oscuro-200">
+          Información adicional
+        </h3>
+        <RichTextContent class="mt-1" :content="discipline.extraInfo" />
+      </div>
+
+      
 
       <div class="mt-8">
         <h2 class="text-lg font-bold text-white">Equipos inscritos</h2>

@@ -34,8 +34,8 @@
             {{ event.isOpen ? 'Abierto' : 'Cerrado' }}
           </span>
         </div>
-        <p class="mt-1 line-clamp-2 text-sm text-oscuro-300">
-          {{ event.description }}
+        <p v-if="event.description" class="mt-1 line-clamp-2 text-sm text-oscuro-300">
+          {{ richTextToPlainText(event.description) }}
         </p>
         <p class="mt-3 text-xs text-oscuro-400">
           {{ formatDateUtc(event.startDate) }} — {{ formatDateUtc(event.endDate) }}
@@ -55,6 +55,7 @@
 <script setup lang="ts">
 import { useEventsStore } from '~/stores/events'
 import { formatDateUtc } from '~/utils/format'
+import { richTextToPlainText } from '~/utils/richText'
 
 const store = useEventsStore()
 

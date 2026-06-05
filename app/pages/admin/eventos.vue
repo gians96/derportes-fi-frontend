@@ -10,16 +10,21 @@
       </button>
     </div>
 
-    <AppModal v-model="showForm" title="Nuevo evento">
+    <AppModal v-model="showForm" title="Nuevo evento" size="4xl">
       <form class="grid gap-4 sm:grid-cols-2" @submit.prevent="create">
         <label class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Nombre</span>
           <input v-model="form.name" required class="input" />
         </label>
-        <label class="block sm:col-span-2">
+        <div class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Descripción</span>
-          <textarea v-model="form.description" rows="2" class="input"></textarea>
-        </label>
+          <RichTextEditor
+            v-model="form.description"
+            class="mt-1"
+            min-height="240px"
+            max-height="360px"
+          />
+        </div>
         <label class="block">
           <span class="text-sm text-oscuro-200">Facultad</span>
           <select v-model.number="form.facultyId" required class="input">
@@ -96,16 +101,21 @@
     </div>
 
     <!-- Editar evento -->
-    <AppModal v-model="editOpen" title="Editar evento">
+    <AppModal v-model="editOpen" title="Editar evento" size="4xl">
       <form class="grid gap-4 sm:grid-cols-2" @submit.prevent="saveEdit">
         <label class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Nombre</span>
           <input v-model="editForm.name" required class="input" />
         </label>
-        <label class="block sm:col-span-2">
+        <div class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Descripción</span>
-          <textarea v-model="editForm.description" rows="2" class="input"></textarea>
-        </label>
+          <RichTextEditor
+            v-model="editForm.description"
+            class="mt-1"
+            min-height="240px"
+            max-height="360px"
+          />
+        </div>
         <label class="block">
           <span class="text-sm text-oscuro-200">Facultad</span>
           <select v-model.number="editForm.facultyId" required class="input">

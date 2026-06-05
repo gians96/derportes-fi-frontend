@@ -12,7 +12,11 @@
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 class="text-2xl font-bold text-white">{{ event.name }}</h1>
-            <p class="mt-1 text-oscuro-300">{{ event.description }}</p>
+            <RichTextContent
+              v-if="event.description"
+              class="mt-2"
+              :content="event.description"
+            />
           </div>
           <span
             class="rounded-full px-3 py-1 text-xs font-semibold"

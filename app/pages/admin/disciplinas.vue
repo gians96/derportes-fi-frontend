@@ -10,7 +10,7 @@
       </button>
     </div>
 
-    <AppModal v-model="showForm" title="Nueva disciplina">
+    <AppModal v-model="showForm" title="Nueva disciplina" size="4xl">
       <form class="grid gap-4 sm:grid-cols-2" @submit.prevent="create">
         <label class="block">
           <span class="text-sm text-oscuro-200">Evento</span>
@@ -101,10 +101,15 @@
           <span class="text-sm text-oscuro-200">Costo (S/)</span>
           <input v-model.number="form.cost" type="number" min="0" step="0.5" class="input" />
         </label>
-        <label class="block sm:col-span-2">
+        <div class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Bases / reglamento</span>
-          <textarea v-model="form.rulesText" rows="3" class="input"></textarea>
-        </label>
+          <RichTextEditor
+            v-model="form.rulesText"
+            class="mt-1"
+            min-height="320px"
+            max-height="460px"
+          />
+        </div>
         <button
           type="submit"
           class="rounded-lg bg-green-500 px-5 py-2.5 font-semibold text-oscuro-900 hover:bg-green-400 sm:col-span-2"
@@ -209,7 +214,7 @@
     </div>
 
     <!-- Editar disciplina -->
-    <AppModal v-model="editOpen" title="Editar disciplina">
+    <AppModal v-model="editOpen" title="Editar disciplina" size="4xl">
       <form class="grid gap-4 sm:grid-cols-2" @submit.prevent="saveEdit">
         <label class="block">
           <span class="text-sm text-oscuro-200">Evento</span>
@@ -293,10 +298,15 @@
           <span class="text-sm text-oscuro-200">Costo (S/)</span>
           <input v-model.number="editForm.cost" type="number" min="0" step="0.5" class="input" />
         </label>
-        <label class="block sm:col-span-2">
+        <div class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Bases / reglamento</span>
-          <textarea v-model="editForm.rulesText" rows="3" class="input"></textarea>
-        </label>
+          <RichTextEditor
+            v-model="editForm.rulesText"
+            class="mt-1"
+            min-height="320px"
+            max-height="460px"
+          />
+        </div>
         <p v-if="modalError" class="text-sm text-red-400 sm:col-span-2">{{ modalError }}</p>
         <button
           type="submit"
