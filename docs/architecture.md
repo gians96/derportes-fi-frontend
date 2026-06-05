@@ -18,7 +18,7 @@ app/
 ├─ middleware/
 │  ├─ auth.ts               # requiere sesión
 │  ├─ admin.ts              # requiere rol OWNER/ADMIN
-│  └─ profile.global.ts     # fuerza completar perfil a estudiantes sin facultad
+│  └─ profile.global.ts     # fuerza perfil incompleto según rol
 ├─ pages/                   # ruteo basado en archivos
 │  ├─ index.vue, login.vue, completar-perfil.vue, 403.vue
 │  ├─ eventos/, disciplinas/, inscripcion/, resultados/
@@ -40,15 +40,15 @@ app/
 - `plugins/auth.client.ts` es `async`: si hay token y no hay `user`, hace
   `await auth.fetchProfile()` y limpia la sesión si falla.
 - Getters de rol: `isOwner`, además de `user` (`id`, `role`, `facultyId`,
-  `schoolId`). `needsProfile` indica si un estudiante debe completar facultad/
-  escuela.
+  `schoolId`, `dni`). `needsProfile` indica si `STUDENT` debe completar
+  facultad/escuela o si `OTHER` debe completar DNI.
 
 ## Middleware
 
 - `auth.ts`: redirige a `login` si no hay sesión.
 - `admin.ts`: bloquea el panel a quien no sea `OWNER_SYSTEM`/`ADMIN_SYSTEM`.
-- `profile.global.ts`: redirige a `completar-perfil` a estudiantes sin
-  facultad/escuela.
+- `profile.global.ts`: redirige a `completar-perfil` a `STUDENT` sin
+  facultad/escuela y a `OTHER` sin DNI.
 
 ## Componentes reutilizables
 

@@ -52,6 +52,21 @@ node .output/server/index.mjs
 - `types/` — tipos de dominio compartidos
 - `assets/css/main.css` — tema oscuro/neón (Rajdhani + paleta `oscuro-*` + `verde-primario`)
 
+## Roles y flujo
+
+- `STUDENT`: correo institucional numérico. Completa facultad/escuela y puede
+  inscribir disciplinas para estudiantes.
+- `OTHER`: correo institucional no numérico. Completa perfil solo con DNI
+  validado por Decolecta; no selecciona facultad ni escuela. Puede ver e
+  inscribir disciplinas para estudiantes y para otros.
+- `OWNER_SYSTEM` / `ADMIN_SYSTEM`: usan el panel admin y pueden crear equipos
+  manualmente, designando delegado.
+
+`/estado-inscripcion` funciona como **Mis inscripciones**: muestra los equipos
+donde el usuario es delegado o integrante, con filtros por evento, disciplina,
+estado y pago. `/admin/inscripciones` es el panel único para revisar equipos
+gratuitos y pagados; el voucher se valida dentro del modal del equipo.
+
 ## Docker / Dokploy
 
 Cada servicio se despliega por separado, **solo con su Dockerfile** (sin docker-compose).

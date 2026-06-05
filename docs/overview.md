@@ -2,24 +2,26 @@
 
 ## 1. Qué hace
 
-Interfaz web para estudiantes y administradores del sistema deportivo de la
-Facultad de Ingeniería. Cubre dos grandes experiencias:
+Interfaz web para estudiantes, usuarios institucionales no estudiantiles y
+administradores del sistema deportivo de la Facultad de Ingeniería. Cubre dos
+grandes experiencias:
 
-### Público / estudiante (layout `default`)
+### Público / usuario institucional (layout `default`)
 - **Inicio** (`index.vue`): eventos deportivos aperturados.
 - **Eventos** (`eventos/`): listado y detalle de un evento con sus disciplinas.
 - **Disciplinas** (`disciplinas/`): detalle de una disciplina y sus bases.
 - **Inscripción** (`inscripcion/[id].vue`): el delegado arma su equipo buscando
   integrantes según el tipo de disciplina —por código contra el padrón SIVIRENO
-  (estudiantes) o por DNI contra RENIEC (externos)—, define delegado y sube el
-  voucher si la disciplina es pagada.
-- **Estado de inscripción** (`estado-inscripcion.vue`): seguimiento de los
-  equipos del usuario (pendiente/aprobado/rechazado).
+  (`STUDENT`) o por DNI contra RENIEC (`OTHER`)— y sube el voucher si la
+  disciplina es pagada. El delegado responsable no se guarda como jugador.
+- **Mis inscripciones** (`estado-inscripcion.vue`): panel del usuario con los
+  equipos donde es delegado o integrante, filtros por evento/disciplina/estado y
+  voucher incrustado en el detalle.
 - **Historial / resultados** (`historial.vue`, `resultados/`): participaciones y
   resultados del usuario.
 - **Login** (`login.vue`) con Google y **completar perfil**
-  (`completar-perfil.vue`) en el primer ingreso del estudiante (facultad/escuela
-  y, si el correo no trae código, su DNI para vincular inscripciones).
+  (`completar-perfil.vue`): `STUDENT` completa facultad/escuela; `OTHER`
+  completa solo DNI validado por Decolecta.
 - **403** (`403.vue`) para accesos no autorizados.
 
 ### Administración (layout `admin`, middleware `admin`)
@@ -28,9 +30,10 @@ Facultad de Ingeniería. Cubre dos grandes experiencias:
 - **Eventos** (`admin/eventos.vue`): CRUD de eventos.
 - **Disciplinas** (`admin/disciplinas.vue`): CRUD + filtros (evento/facultad/
   escuela).
-- **Inscripciones** (`admin/inscripciones.vue`): aprobar/rechazar equipos y
-  **crear equipos manualmente** (con voucher).
-- **Vouchers** (`admin/vouchers.vue`): validar/rechazar comprobantes.
+- **Inscripciones** (`admin/inscripciones.vue`): panel único para aprobar o
+  rechazar equipos gratuitos y pagados; en equipos de pago el modal incluye el
+  voucher y permite validarlo.
+- **Vouchers** (`admin/vouchers.vue`): vista secundaria de compatibilidad.
 - **Usuarios** (`admin/usuarios.vue`): CRUD, roles y habilitar/inhabilitar.
 
 ## 2. Qué se quiere lograr
@@ -45,9 +48,10 @@ errores 401.
 
 ### Implementado
 - Sesión persistente con `useCookie` (sobrevive a refresh, compatible con SSR).
-- Login Google + flujo de completar perfil (facultad/escuela) para estudiantes.
-- Panel admin completo: facultades, eventos, disciplinas, inscripciones,
-  vouchers, usuarios, dashboard.
+- Login Google + completar perfil diferenciado: facultad/escuela para
+  `STUDENT`, solo DNI para `OTHER`.
+- Panel admin completo: facultades, eventos, disciplinas, inscripciones
+  unificadas, usuarios, dashboard y vouchers como compatibilidad.
 - Componentes reutilizables `AppModal` y `AppConfirm` para formularios y
   confirmaciones de borrado en todo el panel.
 - Creación manual de equipos por admin/owner (con búsqueda de integrantes y
