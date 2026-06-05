@@ -81,8 +81,15 @@
       <div
         class="mx-auto max-w-6xl px-4 py-6 text-center text-sm text-oscuro-400 sm:px-6"
       >
-        © {{ new Date().getFullYear() }} Facultad de Ingeniería · Universidad
-        Nacional de Cañete
+        © {{ new Date().getFullYear() }} Todos los derechos reservados
+        <a
+          href="https://github.com/gians96/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-green-400 transition hover:text-green-300"
+        >
+          gians96
+        </a>
       </div>
     </footer>
   </div>

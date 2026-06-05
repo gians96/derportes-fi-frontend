@@ -145,7 +145,7 @@
           </div>
           <div class="h-14 w-px bg-oscuro-700" />
           <div class="flex-1 text-center">
-            <p class="text-xs text-oscuro-400">ValidaciÃ³n de reglas</p>
+            <p class="text-xs text-oscuro-400">Validación de reglas</p>
             <p
               class="mt-1 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold"
               :class="
@@ -190,7 +190,7 @@
             v-if="team.discipline.participantType === 'STUDENT'"
             class="rounded-lg bg-oscuro-900/70 px-2.5 py-1 font-semibold text-white"
           >
-            Ciclo - SecciÃ³n: {{ teamCycleSection(team) }}
+            Ciclo - Sección: {{ teamCycleSection(team) }}
           </span>
         </div>
 
@@ -257,7 +257,7 @@
               </p>
             </div>
             <div class="rounded-xl bg-oscuro-900/60 p-3">
-              <p class="text-xs text-oscuro-400">Ciclo - secciÃ³n</p>
+              <p class="text-xs text-oscuro-400">Ciclo - sección</p>
               <p class="mt-1 text-sm font-semibold text-white">
                 {{ teamCycleSection(reviewTeam) }}
               </p>
@@ -361,7 +361,7 @@
           </div>
 
           <div v-else class="rounded-2xl border border-green-500/20 bg-green-500/5 p-4">
-            <h3 class="font-bold text-green-300">InscripciÃ³n gratuita</h3>
+            <h3 class="font-bold text-green-300">Inscripción gratuita</h3>
             <p class="mt-1 text-sm text-oscuro-300">
               Solo requiere validar que el equipo cumpla las bases.
             </p>
@@ -408,7 +408,7 @@
             :disabled="!reviewRules.ok"
             @click="approveReview"
           >
-            Aprobar inscripciÃ³n
+            Aprobar inscripción
           </button>
 
           <div
@@ -417,14 +417,14 @@
           >
             <input
               v-model="registrationRejectReason"
-              placeholder="Motivo de rechazo de inscripciÃ³n"
+              placeholder="Motivo de rechazo de inscripción"
               class="min-w-0 rounded-lg border border-oscuro-700 bg-oscuro-900/60 px-3 py-2 text-sm text-white"
             />
             <button
               class="rounded-lg bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/25"
               @click="rejectReview"
             >
-              Rechazar inscripciÃ³n
+              Rechazar inscripción
             </button>
           </div>
         </div>
@@ -692,7 +692,7 @@ function countedPlayers(team: Team) {
 }
 
 function teamCycleSection(team: Team) {
-  if (!team.cycle && !team.section) return 'â€”'
+  if (!team.cycle && !team.section) return '-'
   return `${team.cycle || 's/ciclo'} - ${team.section || 's/secciÃ³n'}`
 }
 
