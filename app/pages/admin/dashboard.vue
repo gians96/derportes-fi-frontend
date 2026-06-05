@@ -79,7 +79,7 @@ const chartValues = computed(() => stats.value.chartValues)
 const actions = [
   { to: '/admin/eventos', label: 'Crear evento', icon: CalendarRange },
   { to: '/admin/disciplinas', label: 'Nueva disciplina', icon: Trophy },
-  { to: '/admin/vouchers', label: 'Validar vouchers', icon: Receipt },
+  { to: '/admin/inscripciones?payment=PAID', label: 'Equipos de pago', icon: Receipt },
   { to: '/admin/usuarios', label: 'Gestionar usuarios', icon: Building2 },
 ]
 

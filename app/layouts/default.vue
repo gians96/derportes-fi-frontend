@@ -30,10 +30,24 @@
           >
             {{ link.label }}
           </NuxtLink>
+          <NuxtLink
+            v-if="auth.isLoggedIn"
+            to="/estado-inscripcion"
+            class="rounded-lg px-3 py-2 text-sm font-semibold text-oscuro-200 transition hover:bg-oscuro-700 hover:text-white"
+            active-class="text-green-400"
+          >
+            Mis inscripciones
+          </NuxtLink>
         </nav>
 
         <div class="flex items-center gap-2">
           <template v-if="auth.isLoggedIn">
+            <NuxtLink
+              to="/estado-inscripcion"
+              class="rounded-lg bg-oscuro-850 px-3 py-2 text-sm font-semibold text-oscuro-200 transition hover:text-white md:hidden"
+            >
+              Mis inscripciones
+            </NuxtLink>
             <NuxtLink
               v-if="auth.isAdmin"
               to="/admin/dashboard"

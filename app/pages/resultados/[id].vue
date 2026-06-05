@@ -1,6 +1,12 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-white">Resultados y tabla</h1>
+    <NuxtLink
+      :to="`/disciplinas/${disciplineId}`"
+      class="inline-flex items-center gap-1 text-sm text-oscuro-300 transition hover:text-white"
+    >
+      <ChevronLeft class="h-4 w-4" /> Volver a la disciplina
+    </NuxtLink>
+    <h1 class="mt-4 text-2xl font-bold text-white">Resultados y tabla</h1>
     <p class="mt-1 text-oscuro-300">{{ disciplineName }}</p>
 
     <div
@@ -45,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { ChevronLeft } from 'lucide-vue-next'
 import type { StandingRow } from '~/types/domain'
 
 const route = useRoute()

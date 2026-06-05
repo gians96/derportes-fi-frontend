@@ -9,11 +9,17 @@
 
     <div class="mt-4 rounded-2xl border border-oscuro-700 bg-oscuro-850 p-6">
       <h1 class="text-2xl font-bold text-white">{{ discipline.name }}</h1>
-      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div class="rounded-lg bg-oscuro-900/60 p-3">
           <p class="text-xs text-oscuro-400">Modalidad</p>
           <p class="font-semibold text-white">
             {{ discipline.modality === 'TEAM' ? 'Por equipos' : 'Individual' }}
+          </p>
+        </div>
+        <div class="rounded-lg bg-oscuro-900/60 p-3">
+          <p class="text-xs text-oscuro-400">Participantes</p>
+          <p class="font-semibold text-white">
+            {{ participantTypeLabel(discipline.participantType) }}
           </p>
         </div>
         <div class="rounded-lg bg-oscuro-900/60 p-3">
@@ -54,17 +60,63 @@
 
       <div class="mt-6 flex flex-wrap gap-3">
         <NuxtLink
+          v-if="!auth.user"
+          :to="{ path: '/login', query: { redirect: `/disciplinas/${discipline.id}` } }"
+          class="rounded-lg bg-green-500 px-5 py-2.5 font-semibold text-oscuro-900 transition hover:bg-green-400"
+        >
+          Iniciar sesión para inscribirme
+        </NuxtLink>
+        <NuxtLink
+          v-else-if="canRegister"
           :to="`/inscripcion/${discipline.id}`"
           class="rounded-lg bg-green-500 px-5 py-2.5 font-semibold text-oscuro-900 transition hover:bg-green-400"
         >
           Inscribir equipo
         </NuxtLink>
+        <span
+          v-else
+          class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 font-semibold text-amber-300"
+        >
+          No disponible para tu tipo de participante
+        </span>
         <NuxtLink
           :to="`/resultados/${discipline.id}`"
           class="rounded-lg border border-oscuro-600 px-5 py-2.5 font-semibold text-oscuro-100 transition hover:bg-oscuro-800"
         >
           Ver resultados
         </NuxtLink>
+      </div>
+
+      <div class="mt-8">
+        <h2 class="text-lg font-bold text-white">Equipos inscritos</h2>
+        <div
+          v-if="registeredTeams.length"
+          class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          <article
+            v-for="(team, index) in registeredTeams"
+            :key="team.id"
+            class="rounded-xl border border-oscuro-700 bg-oscuro-900/60 p-4 transition hover:border-green-500/40 hover:bg-oscuro-850"
+          >
+            <div class="flex items-start gap-3">
+              <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-green-500/10 text-sm font-bold text-green-300">
+                {{ index + 1 }}
+              </span>
+              <div class="min-w-0">
+                <p class="truncate font-bold text-white">{{ team.name }}</p>
+                <p class="mt-1 text-xs text-oscuro-400">
+                  {{ teamCycleSection(team) }}
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+        <p
+          v-else
+          class="mt-3 rounded-xl border border-dashed border-oscuro-700 bg-oscuro-900/60 p-6 text-center text-sm text-oscuro-400"
+        >
+          Aún no hay equipos inscritos.
+        </p>
       </div>
     </div>
   </div>
@@ -73,20 +125,38 @@
 
 <script setup lang="ts">
 import { ChevronLeft } from 'lucide-vue-next'
-import type { Discipline } from '~/types/domain'
+import type { Discipline, DisciplineTeamSummary } from '~/types/domain'
+import { useAuthStore } from '~/stores/auth'
 import { formatCurrency, formatDateUtc } from '~/utils/format'
+import { canUseParticipantType, participantTypeLabel } from '~/utils/participants'
 
 const route = useRoute()
-const discipline = ref<Discipline | null>(null)
+const auth = useAuthStore()
+const api = useApi()
 
-onMounted(async () => {
-  const api = useApi()
-  try {
-    discipline.value = await api.get<Discipline>(
-      `/disciplines/${Number(route.params.id)}`,
-    )
-  } catch {
-    discipline.value = null
-  }
+const { data: discipline } = await useAsyncData<Discipline | null>(
+  `discipline-${route.params.id}`,
+  async () => {
+    try {
+      return await api.get<Discipline>(`/disciplines/${Number(route.params.id)}`)
+    } catch {
+      return null
+    }
+  },
+  { default: () => null },
+)
+
+const canRegister = computed(() => {
+  if (!discipline.value || !auth.user) return false
+  return canUseParticipantType(auth.user, discipline.value.participantType)
 })
+
+const registeredTeams = computed(
+  () => discipline.value?.teams?.filter((team) => team.status === 'APPROVED') ?? [],
+)
+
+function teamCycleSection(team: DisciplineTeamSummary) {
+  if (!team.cycle && !team.section) return 'Sin ciclo ni sección'
+  return `${team.cycle || 's/ciclo'} - ${team.section || 's/sección'}`
+}
 </script>

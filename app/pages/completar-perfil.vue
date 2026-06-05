@@ -12,11 +12,11 @@
         Completa tu perfil
       </h1>
       <p class="mt-2 text-center text-sm text-oscuro-300">
-        Selecciona tu facultad y escuela profesional para continuar.
+        {{ profileIntro }}
       </p>
 
       <form class="mt-8 space-y-4" @submit.prevent="save">
-        <label class="block">
+        <label v-if="needsAcademicProfile" class="block">
           <span class="text-sm text-oscuro-200">Facultad</span>
           <select v-model.number="form.facultyId" required class="input">
             <option :value="0" disabled>Selecciona una facultad</option>
@@ -26,7 +26,7 @@
           </select>
         </label>
 
-        <label class="block">
+        <label v-if="needsAcademicProfile" class="block">
           <span class="text-sm text-oscuro-200">Escuela profesional</span>
           <select
             v-model.number="form.schoolId"
@@ -53,8 +53,7 @@
             class="input"
           />
           <span class="mt-1 block text-xs text-oscuro-400">
-            Tu correo no corresponde a un código de estudiante. Ingresa tu DNI
-            para vincular tus inscripciones.
+            Validaremos tu identidad con Decolecta para completar tu cuenta institucional.
           </span>
         </label>
 
@@ -89,9 +88,13 @@ const form = reactive({
 const error = ref('')
 const saving = ref(false)
 
-// Pedimos DNI cuando el correo no es un código de estudiante (sin studentCode).
-const needsDni = computed(
-  () => auth.user?.role === 'STUDENT' && !auth.user?.studentCode,
+// Los usuarios institucionales no estudiantes completan el perfil solo con DNI.
+const needsAcademicProfile = computed(() => auth.user?.role === 'STUDENT')
+const needsDni = computed(() => auth.user?.role === 'OTHER')
+const profileIntro = computed(() =>
+  needsDni.value
+    ? 'Ingresa tu DNI para validar tu cuenta institucional.'
+    : 'Selecciona tu facultad y escuela profesional para continuar.',
 )
 
 const schoolsOfFaculty = computed(
@@ -107,7 +110,7 @@ watch(
 
 async function save() {
   error.value = ''
-  if (!form.facultyId || !form.schoolId) {
+  if (needsAcademicProfile.value && (!form.facultyId || !form.schoolId)) {
     error.value = 'Selecciona facultad y escuela'
     return
   }
@@ -117,11 +120,11 @@ async function save() {
   }
   saving.value = true
   try {
-    await auth.updateProfile({
-      facultyId: form.facultyId,
-      schoolId: form.schoolId,
-      ...(needsDni.value ? { dni: form.dni } : {}),
-    })
+    await auth.updateProfile(
+      needsDni.value
+        ? { dni: form.dni }
+        : { facultyId: form.facultyId, schoolId: form.schoolId },
+    )
     await navigateTo(auth.isAdmin ? '/admin/dashboard' : '/')
   } catch (err: unknown) {
     error.value =

@@ -34,8 +34,9 @@ export const useAuthStore = defineStore('auth', {
       state.user?.role === 'OWNER_SYSTEM',
     isOwner: (state) => state.user?.role === 'OWNER_SYSTEM',
     needsProfile: (state) =>
-      state.user?.role === 'STUDENT' &&
-      (!state.user?.facultyId || !state.user?.schoolId),
+      (state.user?.role === 'STUDENT' &&
+        (!state.user?.facultyId || !state.user?.schoolId)) ||
+      (state.user?.role === 'OTHER' && !state.user?.dni),
   },
 
   actions: {
@@ -82,8 +83,8 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async updateProfile(payload: {
-      facultyId: number
-      schoolId: number
+      facultyId?: number
+      schoolId?: number
       dni?: string
     }) {
       const api = useApi()

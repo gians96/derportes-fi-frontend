@@ -8,6 +8,9 @@
         <p class="mt-0.5 text-sm text-oscuro-300">
           {{ modalityLabel }} · {{ genderLabel }}
         </p>
+        <p class="mt-1 text-xs font-semibold text-green-300">
+          {{ participantTypeLabel(discipline.participantType) }}
+        </p>
       </div>
       <span
         class="rounded-md border px-2 py-1 text-xs font-semibold"
@@ -53,6 +56,7 @@
 <script setup lang="ts">
 import type { Discipline } from '~/types/domain'
 import { formatCurrency, formatDateUtc } from '~/utils/format'
+import { participantTypeLabel } from '~/utils/participants'
 
 const props = defineProps<{ discipline: Discipline }>()
 

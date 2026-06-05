@@ -48,6 +48,7 @@
                 @change="updateRole(u)"
               >
                 <option value="STUDENT">Estudiante</option>
+                <option value="OTHER">Otro</option>
                 <option v-if="auth.isOwner" value="ADMIN_SYSTEM">
                   Administrador
                 </option>
@@ -103,6 +104,7 @@
           <span class="text-sm text-oscuro-200">Rol</span>
           <select v-model="createForm.role" class="input">
             <option value="STUDENT">Estudiante</option>
+            <option value="OTHER">Otro</option>
             <option v-if="auth.isOwner" value="ADMIN_SYSTEM">Administrador</option>
             <option v-if="auth.isOwner" value="OWNER_SYSTEM">Owner</option>
           </select>
@@ -111,7 +113,7 @@
           <span class="text-sm text-oscuro-200">DNI (opcional)</span>
           <input v-model="createForm.dni" class="input" />
         </label>
-        <label class="block">
+        <label v-if="createForm.role !== 'OTHER'" class="block">
           <span class="text-sm text-oscuro-200">Facultad (opcional)</span>
           <select v-model.number="createForm.facultyId" class="input">
             <option :value="0">Sin facultad</option>
@@ -120,7 +122,7 @@
             </option>
           </select>
         </label>
-        <label class="block">
+        <label v-if="createForm.role !== 'OTHER'" class="block">
           <span class="text-sm text-oscuro-200">Escuela (opcional)</span>
           <select v-model.number="createForm.schoolId" class="input">
             <option :value="0">Sin escuela</option>
@@ -157,7 +159,7 @@
           <span class="text-sm text-oscuro-200">DNI</span>
           <input v-model="editForm.dni" class="input" />
         </label>
-        <label class="block">
+        <label v-if="editForm.role !== 'OTHER'" class="block">
           <span class="text-sm text-oscuro-200">Facultad</span>
           <select v-model.number="editForm.facultyId" class="input">
             <option :value="0">Sin facultad</option>
@@ -166,7 +168,7 @@
             </option>
           </select>
         </label>
-        <label class="block sm:col-span-2">
+        <label v-if="editForm.role !== 'OTHER'" class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Escuela</span>
           <select v-model.number="editForm.schoolId" class="input">
             <option :value="0">Sin escuela</option>
@@ -234,12 +236,12 @@ function showModalError(err: unknown, fallback: string) {
 }
 
 // Un owner puede editar a cualquiera salvo otros owners.
-// Un admin solo puede editar estudiantes.
+// Un admin solo puede editar usuarios no administrativos.
 function canEdit(u: AuthUser) {
   if (u.role === 'OWNER_SYSTEM') return false
   if (u.id === auth.user?.id) return false
   if (auth.isOwner) return true
-  return u.role === 'STUDENT'
+  return u.role === 'STUDENT' || u.role === 'OTHER'
 }
 
 async function load() {
@@ -275,6 +277,15 @@ const createForm = reactive({
 })
 const createSchools = computed(() => schoolsOf(createForm.facultyId))
 watch(
+  () => createForm.role,
+  (role) => {
+    if (role === 'OTHER') {
+      createForm.facultyId = 0
+      createForm.schoolId = 0
+    }
+  },
+)
+watch(
   () => createForm.facultyId,
   () => {
     createForm.schoolId = 0
@@ -302,8 +313,8 @@ async function createUser() {
       email: createForm.email,
       role: createForm.role,
       dni: createForm.dni || undefined,
-      facultyId: createForm.facultyId || undefined,
-      schoolId: createForm.schoolId || undefined,
+      facultyId: createForm.role === 'OTHER' ? undefined : createForm.facultyId || undefined,
+      schoolId: createForm.role === 'OTHER' ? undefined : createForm.schoolId || undefined,
     })
     createOpen.value = false
     await load()
@@ -318,11 +329,21 @@ const editId = ref<number | null>(null)
 const editForm = reactive({
   fullName: '',
   email: '',
+  role: 'STUDENT' as AuthUser['role'],
   dni: '',
   facultyId: 0,
   schoolId: 0,
 })
 const editSchools = computed(() => schoolsOf(editForm.facultyId))
+watch(
+  () => editForm.role,
+  (role) => {
+    if (role === 'OTHER') {
+      editForm.facultyId = 0
+      editForm.schoolId = 0
+    }
+  },
+)
 watch(
   () => editForm.facultyId,
   (nv, ov) => {
@@ -336,6 +357,7 @@ function openEdit(u: AuthUser) {
   Object.assign(editForm, {
     fullName: u.fullName,
     email: u.email,
+    role: u.role,
     dni: u.dni ?? '',
     facultyId: u.facultyId ?? 0,
     schoolId: u.schoolId ?? 0,
@@ -350,8 +372,8 @@ async function saveUser() {
       fullName: editForm.fullName,
       email: editForm.email,
       dni: editForm.dni || null,
-      facultyId: editForm.facultyId || null,
-      schoolId: editForm.schoolId || null,
+      facultyId: editForm.role === 'OTHER' ? null : editForm.facultyId || null,
+      schoolId: editForm.role === 'OTHER' ? null : editForm.schoolId || null,
     })
     editOpen.value = false
     await load()

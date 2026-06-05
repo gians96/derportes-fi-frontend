@@ -94,7 +94,6 @@ import {
   LayoutDashboard,
   CalendarRange,
   Users,
-  Receipt,
   Trophy,
   ShieldCheck,
   ExternalLink,
@@ -113,7 +112,6 @@ const menuItems = [
   { to: '/admin/eventos', label: 'Eventos', icon: CalendarRange },
   { to: '/admin/disciplinas', label: 'Disciplinas', icon: Trophy },
   { to: '/admin/inscripciones', label: 'Equipos', icon: Users },
-  { to: '/admin/vouchers', label: 'Vouchers', icon: Receipt },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Building2 },
 ]
 

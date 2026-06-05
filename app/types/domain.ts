@@ -1,6 +1,6 @@
 // Tipos de dominio compartidos del frontend
 
-export type Role = 'OWNER_SYSTEM' | 'ADMIN_SYSTEM' | 'STUDENT'
+export type Role = 'OWNER_SYSTEM' | 'ADMIN_SYSTEM' | 'STUDENT' | 'OTHER'
 
 export type Gender = 'M' | 'F' | 'O'
 
@@ -83,6 +83,16 @@ export interface Discipline {
   registrationDeadline: string
   teamsCount?: number
   event?: { id: number; name: string }
+  teams?: DisciplineTeamSummary[]
+}
+
+export interface DisciplineTeamSummary {
+  id: number
+  name: string
+  status: RegistrationStatus
+  cycle?: string | null
+  section?: string | null
+  createdAt: string
 }
 
 export interface Participant {
@@ -92,6 +102,7 @@ export interface Participant {
   dni?: string | null
   gender: Gender
   isDelegate: boolean
+  countsAsPlayer: boolean
   userId?: number | null
 }
 
@@ -121,6 +132,9 @@ export interface Team {
   disciplineName?: string
   discipline?: TeamDiscipline
   delegateId: number
+  delegate?: Pick<AuthUser, 'id' | 'fullName' | 'email' | 'studentCode' | 'dni'>
+  cycle?: string | null
+  section?: string | null
   phone?: string | null
   status: RegistrationStatus
   rejectionReason?: string | null
@@ -133,6 +147,8 @@ export interface Voucher {
   id: number
   teamId: number
   teamName?: string
+  cycle?: string | null
+  section?: string | null
   phone?: string | null
   operationNumber: string
   amount: number

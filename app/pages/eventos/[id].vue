@@ -32,11 +32,11 @@
 
       <h2 class="mt-8 text-xl font-bold text-white">Disciplinas</h2>
       <div
-        v-if="store.disciplines.length"
+        v-if="visibleDisciplines.length"
         class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         <DisciplineCard
-          v-for="d in store.disciplines"
+          v-for="d in visibleDisciplines"
           :key="d.id"
           :discipline="d"
         />
@@ -45,7 +45,7 @@
         v-else
         class="mt-4 rounded-xl border border-dashed border-oscuro-700 bg-oscuro-850 p-10 text-center text-oscuro-400"
       >
-        Aún no hay disciplinas configuradas para este evento.
+        No hay disciplinas disponibles para tu tipo de participante.
       </div>
     </div>
 
@@ -57,12 +57,21 @@
 import { ChevronLeft } from 'lucide-vue-next'
 import type { SportEvent } from '~/types/domain'
 import { useEventsStore } from '~/stores/events'
+import { useAuthStore } from '~/stores/auth'
 import { formatDateUtc } from '~/utils/format'
+import { userParticipantTypes } from '~/utils/participants'
 
 const route = useRoute()
 const store = useEventsStore()
+const auth = useAuthStore()
 const eventId = Number(route.params.id)
 const event = ref<SportEvent | null>(null)
+
+const visibleDisciplines = computed(() => {
+  if (!auth.user) return store.disciplines
+  const types = userParticipantTypes(auth.user)
+  return store.disciplines.filter((d) => types.includes(d.participantType))
+})
 
 onMounted(async () => {
   const api = useApi()

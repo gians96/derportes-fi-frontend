@@ -145,16 +145,16 @@
       </label>
     </div>
 
-    <div class="mt-6 grid gap-3 sm:grid-cols-2">
+    <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <div
         v-for="d in disciplines"
         :key="d.id"
-        class="rounded-2xl border border-oscuro-700 bg-oscuro-850 p-4 transition-all hover:border-green-700/40 hover:shadow-lg hover:shadow-green-900/10"
+        class="rounded-xl border border-oscuro-700 bg-oscuro-850 p-3 transition-all hover:border-green-700/40 hover:shadow-lg hover:shadow-green-900/10"
       >
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-3">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex min-w-0 items-start gap-3">
             <span
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
               :class="getSportMeta(d.name).bg"
             >
               <component
@@ -163,43 +163,47 @@
                 :class="getSportMeta(d.name).color"
               />
             </span>
-            <p class="truncate font-semibold text-white">{{ d.name }}</p>
+            <div class="min-w-0">
+              <div class="flex min-w-0 flex-wrap items-center gap-2">
+                <p class="truncate font-semibold text-white">{{ d.name }}</p>
+                <span
+                  class="rounded-md px-2 py-0.5 text-[11px] font-semibold"
+                  :class="
+                    d.participantType === 'OTHER'
+                      ? 'bg-amber-500/10 text-amber-300'
+                      : 'bg-sky-500/10 text-sky-300'
+                  "
+                >
+                  {{ d.participantType === 'OTHER' ? 'Otros' : 'Estudiantes' }}
+                </span>
+              </div>
+              <p class="mt-1 text-xs text-oscuro-400">
+                {{ d.modality === 'TEAM' ? 'Equipos' : 'Individual' }} ·
+                {{ d.minPlayers }}-{{ d.maxPlayers }} jug. ·
+                {{ d.isPaid ? formatCurrency(d.cost) : 'Gratuito' }}
+              </p>
+            </div>
           </div>
-          <span class="shrink-0 text-xs text-oscuro-400">
-            {{ d.modality === 'TEAM' ? 'Equipos' : 'Individual' }}
-          </span>
-        </div>
-        <div class="mt-2 flex flex-wrap items-center gap-2">
-          <span
-            class="rounded-md px-2 py-0.5 text-[11px] font-semibold"
-            :class="
-              d.participantType === 'OTHER'
-                ? 'bg-amber-500/10 text-amber-300'
-                : 'bg-sky-500/10 text-sky-300'
-            "
-          >
-            {{
-              d.participantType === 'OTHER' ? 'Otros' : 'Solo estudiantes'
-            }}
-          </span>
-        </div>
-        <p class="mt-2 text-xs text-oscuro-400">
-          {{ d.minPlayers }}-{{ d.maxPlayers }} jug. ·
-          {{ d.isPaid ? formatCurrency(d.cost) : 'Gratuito' }}
-        </p>
-        <div class="mt-3 flex items-center gap-2">
-          <button
-            class="rounded-lg px-3 py-1.5 text-xs font-semibold text-sky-300 hover:bg-sky-500/10"
-            @click="openEdit(d)"
-          >
-            Editar
-          </button>
-          <button
-            class="rounded-lg px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10"
-            @click="askDelete(d)"
-          >
-            Eliminar
-          </button>
+          <div class="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sky-300 transition hover:bg-sky-500/10"
+              title="Editar disciplina"
+              aria-label="Editar disciplina"
+              @click="openEdit(d)"
+            >
+              <Pencil class="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-400 transition hover:bg-red-500/10"
+              title="Eliminar disciplina"
+              aria-label="Eliminar disciplina"
+              @click="askDelete(d)"
+            >
+              <Trash2 class="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -316,6 +320,7 @@
 </template>
 
 <script setup lang="ts">
+import { Pencil, Trash2 } from 'lucide-vue-next'
 import type { Discipline, SportEvent } from '~/types/domain'
 import { formatCurrency } from '~/utils/format'
 import { SPORTS, getSportMeta } from '~/utils/sports'
