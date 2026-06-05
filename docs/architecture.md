@@ -18,6 +18,7 @@ app/
 ├─ middleware/
 │  ├─ auth.ts               # requiere sesión
 │  ├─ admin.ts              # requiere rol OWNER/ADMIN
+│  ├─ guest.ts              # evita que usuarios con sesión vuelvan al login
 │  └─ profile.global.ts     # fuerza perfil incompleto según rol
 ├─ pages/                   # ruteo basado en archivos
 │  ├─ index.vue, login.vue, completar-perfil.vue, 403.vue
@@ -47,6 +48,8 @@ app/
 
 - `auth.ts`: redirige a `login` si no hay sesión.
 - `admin.ts`: bloquea el panel a quien no sea `OWNER_SYSTEM`/`ADMIN_SYSTEM`.
+- `guest.ts`: si ya hay sesión en `/login`, redirige al panel admin,
+  `completar-perfil` o inicio según rol/perfil.
 - `profile.global.ts`: redirige a `completar-perfil` a `STUDENT` sin
   facultad/escuela y a `OTHER` sin DNI.
 

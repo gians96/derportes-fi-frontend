@@ -24,7 +24,7 @@ en [`docs/`](./docs/README.md).
 - **Componentes y composables auto-importados**: no añadas `import` para
   `AppModal`, `AppConfirm`, `useApi`, `useFaculties`, `useAuthStore`, etc.
 - Capas clave: `composables/useApi.ts` (HTTP), `stores/auth.ts` (sesión),
-  `middleware/` (`auth`, `admin`, `profile.global`), `layouts/` (`default`,
+  `middleware/` (`auth`, `admin`, `guest`, `profile.global`), `layouts/` (`default`,
   `admin`), `types/domain.ts` (tipos compartidos).
 - Detalle completo en [`docs/architecture.md`](./docs/architecture.md).
 
@@ -43,18 +43,22 @@ en [`docs/`](./docs/README.md).
 
 ## Reglas de UX/negocio a respetar
 
-- El **primer integrante** de un equipo es el delegado; se puede reasignar. No
-  agregar un campo de "delegado" separado en la creación manual.
+- El delegado responsable es `Team.delegateId`; no se guarda automáticamente como
+  jugador. En creación manual admin/owner puede seleccionar `delegateId`.
 - **No permitir integrantes duplicados** (validar por código/DNI antes de
   agregar) — aplica en `inscripcion/[id].vue` y `admin/inscripciones.vue`.
 - En el panel admin, respetar permisos: `admin.ts` exige rol OWNER/ADMIN; en
   usuarios, un admin no edita admins/owners y nadie se inhabilita a sí mismo.
 - Disciplinas pagadas (`isPaid`) requieren voucher en la inscripción.
+- En `admin/inscripciones.vue`, mostrar siempre `team.phone` como teléfono de
+  contacto del equipo/delegado; si falta, usar un texto discreto.
 
 ## Sesión
 
 - El token vive en `useCookie('deportes_fi_token')` (SSR-friendly). La sesión se
   restaura en `plugins/auth.client.ts`. Un 401 desde `useApi` limpia la sesión.
+- `middleware/guest.ts` redirige a usuarios autenticados que entren a `/login`
+  hacia admin, completar perfil o inicio según corresponda.
 
 ## Antes de dar por terminado
 

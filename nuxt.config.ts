@@ -47,8 +47,6 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001/api/v1',
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-      institutionalDomain:
-        process.env.NUXT_PUBLIC_INSTITUTIONAL_DOMAIN || 'undc.edu.pe',
     },
   },
 })

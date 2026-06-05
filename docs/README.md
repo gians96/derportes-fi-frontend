@@ -13,12 +13,14 @@ construida con Nuxt 4 + Vue 3 + Tailwind CSS 4. Consume la API del backend
 
 ## Flujo actual
 
+- `login.vue` usa Google Identity sin lista de dominios permitidos.
 - `completar-perfil.vue` muestra facultad/escuela para `STUDENT` y solo DNI para
   `OTHER`.
 - `estado-inscripcion.vue` funciona como **Mis inscripciones**, con equipos donde
   el usuario es delegado o integrante.
 - `admin/inscripciones.vue` unifica la revisión de equipos gratuitos y pagados,
-  incluyendo voucher incrustado en el modal.
+  mostrando teléfono de contacto del equipo/delegado e incluyendo voucher
+  incrustado en el modal.
 - `admin/usuarios.vue` permite administrar roles no administrativos `STUDENT` y
   `OTHER`.
 

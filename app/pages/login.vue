@@ -10,8 +10,7 @@
       </div>
       <h1 class="text-2xl font-bold text-white">Deportes FI</h1>
       <p class="mt-2 text-sm text-oscuro-300">
-        Ingresa con tu correo institucional
-        <span class="text-green-400">@{{ domain }}</span>
+        Ingresa con tu cuenta de Google
       </p>
 
       <div class="mt-8 flex justify-center">
@@ -24,7 +23,7 @@
       </p>
 
       <p class="mt-8 text-xs text-oscuro-500">
-        Solo cuentas con dominio institucional pueden acceder.
+        Los participantes externos deben validar su DNI para continuar.
       </p>
     </div>
   </div>
@@ -34,11 +33,11 @@
 import { Trophy } from 'lucide-vue-next'
 import { useAuthStore } from '~/stores/auth'
 
+definePageMeta({ middleware: 'guest' })
+
 const auth = useAuthStore()
 const route = useRoute()
-const config = useRuntimeConfig()
 const error = ref('')
-const domain = config.public.institutionalDomain
 
 async function onSuccess() {
   const redirect = (route.query.redirect as string) || '/'

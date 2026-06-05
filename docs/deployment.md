@@ -22,7 +22,6 @@ docker run -p 3000:3000 --env-file .env deportes-fi-frontend
 | --------------------------------- | ----------- | ------- |
 | `NUXT_PUBLIC_API_BASE`            | Base de la API del backend | `https://api.deportes-fi.undc.edu.pe/api/v1` |
 | `NUXT_PUBLIC_GOOGLE_CLIENT_ID`    | Client ID de Google (mismo que el backend) | |
-| `NUXT_PUBLIC_INSTITUTIONAL_DOMAIN`| Dominio institucional | `undc.edu.pe` |
 
 > Estas variables son **públicas** (`runtimeConfig.public`): se exponen al
 > cliente. No pongas secretos aquí.

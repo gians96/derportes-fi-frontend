@@ -2,11 +2,11 @@
 
 ## 1. Qué hace
 
-Interfaz web para estudiantes, usuarios institucionales no estudiantiles y
+Interfaz web para estudiantes, usuarios externos/otros y
 administradores del sistema deportivo de la Facultad de Ingeniería. Cubre dos
 grandes experiencias:
 
-### Público / usuario institucional (layout `default`)
+### Público / usuario autenticado (layout `default`)
 - **Inicio** (`index.vue`): eventos deportivos aperturados.
 - **Eventos** (`eventos/`): listado y detalle de un evento con sus disciplinas.
 - **Disciplinas** (`disciplinas/`): detalle de una disciplina y sus bases.
@@ -19,7 +19,8 @@ grandes experiencias:
   voucher incrustado en el detalle.
 - **Historial / resultados** (`historial.vue`, `resultados/`): participaciones y
   resultados del usuario.
-- **Login** (`login.vue`) con Google y **completar perfil**
+- **Login** (`login.vue`) con Google, sin filtrar dominios de correo, y
+  **completar perfil**
   (`completar-perfil.vue`): `STUDENT` completa facultad/escuela; `OTHER`
   completa solo DNI validado por Decolecta.
 - **403** (`403.vue`) para accesos no autorizados.
@@ -31,8 +32,9 @@ grandes experiencias:
 - **Disciplinas** (`admin/disciplinas.vue`): CRUD + filtros (evento/facultad/
   escuela).
 - **Inscripciones** (`admin/inscripciones.vue`): panel único para aprobar o
-  rechazar equipos gratuitos y pagados; en equipos de pago el modal incluye el
-  voucher y permite validarlo.
+  rechazar equipos gratuitos y pagados; muestra el teléfono de contacto del
+  equipo/delegado y, en equipos de pago, el modal incluye el voucher y permite
+  validarlo.
 - **Vouchers** (`admin/vouchers.vue`): vista secundaria de compatibilidad.
 - **Usuarios** (`admin/usuarios.vue`): CRUD, roles y habilitar/inhabilitar.
 

@@ -23,7 +23,6 @@ cp .env.example .env
 | --- | --- |
 | `NUXT_PUBLIC_API_BASE` | URL del backend, sin slash final (ej. `http://localhost:3001/api/v1`) |
 | `NUXT_PUBLIC_GOOGLE_CLIENT_ID` | Client ID de Google OAuth |
-| `NUXT_PUBLIC_INSTITUTIONAL_DOMAIN` | Dominio institucional permitido (`undc.edu.pe`) |
 
 ## Desarrollo
 
@@ -48,15 +47,15 @@ node .output/server/index.mjs
 - `components/` — componentes reutilizables (Google sign-in, badges, cards, charts)
 - `stores/` — Pinia (`auth`, `events`)
 - `composables/` — `useApi` (cliente HTTP con JWT)
-- `middleware/` — `auth`, `admin`
+- `middleware/` — `auth`, `admin`, `guest`, `profile.global`
 - `types/` — tipos de dominio compartidos
 - `assets/css/main.css` — tema oscuro/neón (Rajdhani + paleta `oscuro-*` + `verde-primario`)
 
 ## Roles y flujo
 
-- `STUDENT`: correo institucional numérico. Completa facultad/escuela y puede
+- `STUDENT`: correo `@undc.edu.pe` numérico. Completa facultad/escuela y puede
   inscribir disciplinas para estudiantes.
-- `OTHER`: correo institucional no numérico. Completa perfil solo con DNI
+- `OTHER`: cualquier otro correo verificado por Google. Completa perfil solo con DNI
   validado por Decolecta; no selecciona facultad ni escuela. Puede ver e
   inscribir disciplinas para estudiantes y para otros.
 - `OWNER_SYSTEM` / `ADMIN_SYSTEM`: usan el panel admin y pueden crear equipos
@@ -65,7 +64,8 @@ node .output/server/index.mjs
 `/estado-inscripcion` funciona como **Mis inscripciones**: muestra los equipos
 donde el usuario es delegado o integrante, con filtros por evento, disciplina,
 estado y pago. `/admin/inscripciones` es el panel único para revisar equipos
-gratuitos y pagados; el voucher se valida dentro del modal del equipo.
+gratuitos y pagados; muestra el teléfono de contacto del equipo/delegado y el
+voucher se valida dentro del modal del equipo.
 
 ## Docker / Dokploy
 

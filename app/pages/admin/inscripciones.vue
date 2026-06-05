@@ -121,11 +121,11 @@
         <div class="mt-4 space-y-1.5 text-xs text-oscuro-300">
           <p class="flex items-center gap-2">
             <CalendarRange class="h-3.5 w-3.5 text-oscuro-500" />
-            <span class="truncate">{{ team.discipline?.event?.name || '—' }}</span>
+            <span class="truncate">{{ team.discipline?.event?.name || 'â€”' }}</span>
           </p>
           <p class="flex items-center gap-2">
             <Building2 class="h-3.5 w-3.5 text-oscuro-500" />
-            <span class="truncate">{{ team.discipline?.event?.faculty?.name || '—' }}</span>
+            <span class="truncate">{{ team.discipline?.event?.faculty?.name || 'â€”' }}</span>
           </p>
           <p class="flex items-center gap-2">
             <GraduationCap class="h-3.5 w-3.5 text-oscuro-500" />
@@ -145,7 +145,7 @@
           </div>
           <div class="h-14 w-px bg-oscuro-700" />
           <div class="flex-1 text-center">
-            <p class="text-xs text-oscuro-400">Validación de reglas</p>
+            <p class="text-xs text-oscuro-400">ValidaciÃ³n de reglas</p>
             <p
               class="mt-1 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold"
               :class="
@@ -168,6 +168,9 @@
             Delegado: {{ team.delegate.fullName }}
           </span>
           <span class="rounded-lg bg-oscuro-900/70 px-2.5 py-1 text-oscuro-300">
+            Tel: {{ teamPhoneLabel(team) }}
+          </span>
+          <span class="rounded-lg bg-oscuro-900/70 px-2.5 py-1 text-oscuro-300">
             {{ participantTypeLabel(team.discipline.participantType) }}
           </span>
           <span
@@ -187,7 +190,7 @@
             v-if="team.discipline.participantType === 'STUDENT'"
             class="rounded-lg bg-oscuro-900/70 px-2.5 py-1 font-semibold text-white"
           >
-            Ciclo - Sección: {{ teamCycleSection(team) }}
+            Ciclo - SecciÃ³n: {{ teamCycleSection(team) }}
           </span>
         </div>
 
@@ -237,18 +240,24 @@
             <StatusBadge :status="reviewTeam.status" />
           </div>
 
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="grid gap-3 sm:grid-cols-3">
             <div class="rounded-xl bg-oscuro-900/60 p-3">
               <p class="text-xs text-oscuro-400">Delegado</p>
               <p class="mt-1 truncate text-sm font-semibold text-white">
                 {{ reviewTeam.delegate?.fullName || 'Responsable registrado' }}
               </p>
               <p class="mt-1 truncate text-xs text-oscuro-400">
-                {{ reviewTeam.delegate?.email || reviewTeam.phone || '—' }}
+                {{ reviewTeam.delegate?.email || '—' }}
               </p>
             </div>
             <div class="rounded-xl bg-oscuro-900/60 p-3">
-              <p class="text-xs text-oscuro-400">Ciclo - sección</p>
+              <p class="text-xs text-oscuro-400">Teléfono de contacto</p>
+              <p class="mt-1 truncate text-sm font-semibold text-white">
+                {{ teamPhoneLabel(reviewTeam) }}
+              </p>
+            </div>
+            <div class="rounded-xl bg-oscuro-900/60 p-3">
+              <p class="text-xs text-oscuro-400">Ciclo - secciÃ³n</p>
               <p class="mt-1 text-sm font-semibold text-white">
                 {{ teamCycleSection(reviewTeam) }}
               </p>
@@ -260,7 +269,7 @@
             :class="reviewRules.ok ? 'bg-green-500/10 text-green-300' : 'bg-red-500/10 text-red-300'"
           >
             <component :is="reviewRules.ok ? CheckCircle2 : AlertTriangle" class="h-4 w-4" />
-            {{ reviewRules.ok ? 'El equipo cumple las bases' : 'El equipo necesita revisión' }}
+            {{ reviewRules.ok ? 'El equipo cumple las bases' : 'El equipo necesita revisiÃ³n' }}
           </div>
           <ul v-if="reviewRules.messages.length" class="space-y-1 rounded-xl bg-red-500/5 p-3 text-xs text-red-300">
             <li v-for="message in reviewRules.messages" :key="message" class="flex items-center gap-1.5">
@@ -294,7 +303,7 @@
                   {{ index + 1 }}. {{ participant.fullName }}
                 </span>
                 <span class="shrink-0 font-mono text-xs text-oscuro-400">
-                  {{ participant.studentCode || participant.dni || '—' }}
+                  {{ participant.studentCode || participant.dni || 'â€”' }}
                 </span>
               </li>
             </ul>
@@ -320,9 +329,9 @@
                   </p>
                 </div>
                 <div class="rounded-xl bg-oscuro-900/60 p-3">
-                  <p class="text-xs text-oscuro-400">N° operación</p>
+                  <p class="text-xs text-oscuro-400">NÂ° operaciÃ³n</p>
                   <p class="truncate font-semibold text-white">
-                    {{ reviewTeam.voucher.operationNumber || '—' }}
+                    {{ reviewTeam.voucher.operationNumber || 'â€”' }}
                   </p>
                 </div>
               </div>
@@ -352,7 +361,7 @@
           </div>
 
           <div v-else class="rounded-2xl border border-green-500/20 bg-green-500/5 p-4">
-            <h3 class="font-bold text-green-300">Inscripción gratuita</h3>
+            <h3 class="font-bold text-green-300">InscripciÃ³n gratuita</h3>
             <p class="mt-1 text-sm text-oscuro-300">
               Solo requiere validar que el equipo cumpla las bases.
             </p>
@@ -362,7 +371,7 @@
             v-if="reviewTeam.status === 'REJECTED' && reviewTeam.rejectionReason"
             class="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300"
           >
-            Inscripción rechazada: {{ reviewTeam.rejectionReason }}
+            InscripciÃ³n rechazada: {{ reviewTeam.rejectionReason }}
           </p>
         </div>
       </div>
@@ -375,14 +384,14 @@
           >
             <input
               v-model="registrationRejectReason"
-              placeholder="Motivo de rechazo de inscripción"
+              placeholder="Motivo de rechazo de inscripciÃ³n"
               class="min-w-0 rounded-lg border border-oscuro-700 bg-oscuro-900/60 px-3 py-2 text-sm text-white"
             />
             <button
               class="rounded-lg bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/25"
               @click="rejectReview"
             >
-              Rechazar inscripción
+              Rechazar inscripciÃ³n
             </button>
             <button
               class="rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-oscuro-900 hover:bg-green-400 disabled:opacity-50"
@@ -399,7 +408,7 @@
             :disabled="!reviewRules.ok"
             @click="approveReview"
           >
-            Aprobar inscripción
+            Aprobar inscripciÃ³n
           </button>
 
           <div
@@ -408,14 +417,14 @@
           >
             <input
               v-model="registrationRejectReason"
-              placeholder="Motivo de rechazo de inscripción"
+              placeholder="Motivo de rechazo de inscripciÃ³n"
               class="min-w-0 rounded-lg border border-oscuro-700 bg-oscuro-900/60 px-3 py-2 text-sm text-white"
             />
             <button
               class="rounded-lg bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/25"
               @click="rejectReview"
             >
-              Rechazar inscripción
+              Rechazar inscripciÃ³n
             </button>
           </div>
         </div>
@@ -429,10 +438,10 @@
           <select v-model.number="createForm.disciplineId" required class="input">
             <option :value="0" disabled>Selecciona...</option>
             <option v-for="discipline in disciplines" :key="discipline.id" :value="discipline.id">
-              {{ discipline.name }} ·
+              {{ discipline.name }} Â·
               {{ discipline.participantType === 'OTHER' ? 'Otros' : 'Solo estudiantes' }}
-              · {{ discipline.isPaid ? formatCurrency(discipline.cost) : 'Gratuito' }}
-              <template v-if="discipline.event"> · {{ discipline.event.name }}</template>
+              Â· {{ discipline.isPaid ? formatCurrency(discipline.cost) : 'Gratuito' }}
+              <template v-if="discipline.event"> Â· {{ discipline.event.name }}</template>
             </option>
           </select>
           <span v-if="!disciplines.length" class="mt-1 block text-xs text-amber-400">
@@ -446,7 +455,7 @@
         </label>
 
         <label class="block">
-          <span class="text-sm text-oscuro-200">Teléfono (opcional)</span>
+          <span class="text-sm text-oscuro-200">TelÃ©fono (opcional)</span>
           <input v-model="createForm.phone" class="input" />
         </label>
 
@@ -455,11 +464,11 @@
           <select v-model.number="createForm.delegateId" required class="input">
             <option :value="0" disabled>Selecciona un usuario</option>
             <option v-for="user in delegateOptions" :key="user.id" :value="user.id">
-              {{ user.fullName }} · {{ user.email }}
+              {{ user.fullName }} Â· {{ user.email }}
             </option>
           </select>
           <span class="mt-1 block text-xs text-oscuro-400">
-            Esta persona podrá ver y gestionar la inscripción.
+            Esta persona podrÃ¡ ver y gestionar la inscripciÃ³n.
           </span>
         </label>
 
@@ -469,7 +478,7 @@
             <input v-model="createForm.cycle" class="input" placeholder="Ej. VIII" />
           </label>
           <label class="block">
-            <span class="text-sm text-oscuro-200">Sección</span>
+            <span class="text-sm text-oscuro-200">SecciÃ³n</span>
             <input v-model="createForm.section" class="input" placeholder="Ej. A" />
           </label>
         </div>
@@ -479,8 +488,8 @@
           <p class="mt-1 text-xs text-oscuro-400">
             {{
               participantMode === 'OTHER'
-                ? 'Busca por DNI (8 dígitos) en RENIEC.'
-                : 'Busca por código de estudiante en el padrón.'
+                ? 'Busca por DNI (8 dÃ­gitos) en RENIEC.'
+                : 'Busca por cÃ³digo de estudiante en el padrÃ³n.'
             }}
             El delegado responsable se elige aparte y no cuenta como jugador.
           </p>
@@ -491,7 +500,7 @@
           <div class="mt-2 flex gap-2">
             <input
               v-model="participantSearch"
-              :placeholder="participantMode === 'OTHER' ? 'DNI (8 dígitos)' : 'Código de estudiante'"
+              :placeholder="participantMode === 'OTHER' ? 'DNI (8 dÃ­gitos)' : 'CÃ³digo de estudiante'"
               :inputmode="participantMode === 'OTHER' ? 'numeric' : 'text'"
               class="input flex-1"
               @keydown.enter.prevent="searchParticipant"
@@ -515,7 +524,7 @@
               <span>
                 {{ participant.fullName }}
                 <span class="text-xs text-oscuro-400">
-                  · {{ participant.studentCode || participant.dni || 's/d' }}
+                  Â· {{ participant.studentCode || participant.dni || 's/d' }}
                 </span>
               </span>
               <button
@@ -537,7 +546,7 @@
             Comprobante de pago ({{ formatCurrency(selectedDiscipline.cost) }})
           </span>
           <label class="block">
-            <span class="text-xs text-oscuro-300">N° de operación</span>
+            <span class="text-xs text-oscuro-300">NÂ° de operaciÃ³n</span>
             <input v-model="createForm.operationNumber" class="input" />
           </label>
           <label class="block">
@@ -661,17 +670,17 @@ function rulesCheck(team: Team): { ok: boolean; messages: string[] } {
   const count = countedPlayers(team)
   if (discipline) {
     if (count < discipline.minPlayers)
-      messages.push(`Mínimo ${discipline.minPlayers} jugadores (tiene ${count}).`)
+      messages.push(`MÃ­nimo ${discipline.minPlayers} jugadores (tiene ${count}).`)
     if (count > discipline.maxPlayers)
-      messages.push(`Máximo ${discipline.maxPlayers} jugadores (tiene ${count}).`)
+      messages.push(`MÃ¡ximo ${discipline.maxPlayers} jugadores (tiene ${count}).`)
     if (discipline.genderPolicy === 'MALE' && team.participants.some((p) => p.gender === 'F'))
       messages.push('La disciplina es solo varones.')
     if (discipline.genderPolicy === 'FEMALE' && team.participants.some((p) => p.gender === 'M'))
       messages.push('La disciplina es solo mujeres.')
     if (discipline.participantType === 'STUDENT' && team.participants.some((p) => !p.studentCode))
-      messages.push('Todos los jugadores deben tener código de estudiante.')
+      messages.push('Todos los jugadores deben tener cÃ³digo de estudiante.')
     if (discipline.participantType === 'STUDENT' && (!team.cycle || !team.section))
-      messages.push('El equipo debe tener ciclo y sección.')
+      messages.push('El equipo debe tener ciclo y secciÃ³n.')
     if (discipline.participantType === 'OTHER' && team.participants.some((p) => !p.dni))
       messages.push('Todos los jugadores deben tener DNI.')
   }
@@ -683,8 +692,12 @@ function countedPlayers(team: Team) {
 }
 
 function teamCycleSection(team: Team) {
-  if (!team.cycle && !team.section) return '—'
-  return `${team.cycle || 's/ciclo'} - ${team.section || 's/sección'}`
+  if (!team.cycle && !team.section) return 'â€”'
+  return `${team.cycle || 's/ciclo'} - ${team.section || 's/secciÃ³n'}`
+}
+
+function teamPhoneLabel(team: Team) {
+  return team.phone?.trim() || 'Sin teléfono'
 }
 
 function voucherBadge(team: Team) {
@@ -866,7 +879,7 @@ async function searchParticipant() {
     let person: AcademicStudent
     if (participantMode.value === 'OTHER') {
       if (!/^\d{8}$/.test(q)) {
-        participantError.value = 'Ingresa un DNI válido de 8 dígitos.'
+        participantError.value = 'Ingresa un DNI vÃ¡lido de 8 dÃ­gitos.'
         return
       }
       person = await api.get<AcademicStudent>('/academic/dni', { numero: q })
@@ -899,8 +912,8 @@ async function searchParticipant() {
   } catch {
     participantError.value =
       participantMode.value === 'OTHER'
-        ? 'No se encontró una persona con ese DNI.'
-        : 'No se encontró un estudiante único con ese código.'
+        ? 'No se encontrÃ³ una persona con ese DNI.'
+        : 'No se encontrÃ³ un estudiante Ãºnico con ese cÃ³digo.'
   } finally {
     searching.value = false
   }
@@ -924,7 +937,7 @@ async function submitCreate() {
     participantMode.value === 'STUDENT' &&
     (!createForm.cycle.trim() || !createForm.section.trim())
   ) {
-    modalError.value = 'Completa ciclo y sección del equipo.'
+    modalError.value = 'Completa ciclo y secciÃ³n del equipo.'
     return
   }
   if (

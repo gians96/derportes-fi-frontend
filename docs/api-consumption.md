@@ -14,7 +14,6 @@ runtimeConfig: {
   public: {
     apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3001/api/v1',
     googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-    institutionalDomain: process.env.NUXT_PUBLIC_INSTITUTIONAL_DOMAIN || 'undc.edu.pe',
   },
 }
 ```
@@ -66,7 +65,7 @@ await api.upload('/registrations', fd)
 
 | Página | Endpoints principales |
 | ------ | --------------------- |
-| `login.vue` | `POST /auth/google` |
+| `login.vue` | `POST /auth/google`; acepta cualquier correo verificado por Google y el rol lo resuelve el backend |
 | `completar-perfil.vue` | `GET /faculties` para `STUDENT`; `PATCH /auth/me/profile` con `{ facultyId, schoolId }` para `STUDENT` o `{ dni }` para `OTHER` |
 | `index.vue` / `eventos/` | `GET /events`, `GET /events/:id` |
 | `disciplinas/` | `GET /disciplines`, `GET /disciplines/:id` |
@@ -75,7 +74,7 @@ await api.upload('/registrations', fd)
 | `admin/facultades.vue` | `GET/POST/PATCH/DELETE /faculties` y `/schools` |
 | `admin/eventos.vue` | `GET/POST/PATCH/DELETE /events` |
 | `admin/disciplinas.vue` | `GET/POST/PATCH/DELETE /disciplines` (con filtros) |
-| `admin/inscripciones.vue` | `GET /registrations` con filtros (`status`, `eventId`, `disciplineId`, `isPaid`), `POST /registrations`, `PATCH /registrations/:id/approve\|reject`, `PATCH /vouchers/:id/validate`, `GET /disciplines`, `GET /academic/student` o `GET /academic/dni` (según `participantType`) |
+| `admin/inscripciones.vue` | `GET /registrations` con filtros (`status`, `eventId`, `disciplineId`, `isPaid`) y `phone` del equipo/delegado, `POST /registrations`, `PATCH /registrations/:id/approve\|reject`, `PATCH /vouchers/:id/validate`, `GET /disciplines`, `GET /academic/student` o `GET /academic/dni` (según `participantType`) |
 | `admin/vouchers.vue` | `GET /vouchers`, `PATCH /vouchers/:id/validate\|reject` (vista secundaria de compatibilidad) |
 | `admin/usuarios.vue` | `GET/POST /users`, `PATCH /users/:id`, `/users/:id/active`, `/users/:id/role` |
 | `admin/dashboard.vue` | `GET /admin/dashboard` |
