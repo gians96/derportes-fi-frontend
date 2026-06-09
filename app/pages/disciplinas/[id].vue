@@ -37,7 +37,7 @@
         <div class="rounded-lg bg-oscuro-900/60 p-3">
           <p class="text-xs text-oscuro-400">Cierre de inscripción</p>
           <p class="font-semibold text-white">
-            {{ formatDateUtc(discipline.registrationDeadline) }}
+            {{ formatDateTime(discipline.registrationDeadline) }}
           </p>
         </div>
       </div>
@@ -123,7 +123,7 @@
 import { ChevronLeft } from 'lucide-vue-next'
 import type { Discipline, DisciplineTeamSummary } from '~/types/domain'
 import { useAuthStore } from '~/stores/auth'
-import { formatCurrency, formatDateUtc } from '~/utils/format'
+import { formatCurrency, formatDateTime } from '~/utils/format'
 import { canUseParticipantType, participantTypeLabel } from '~/utils/participants'
 
 const route = useRoute()

@@ -73,10 +73,12 @@ await api.upload('/registrations', fd)
 | `estado-inscripcion.vue` | `GET /registrations/mine` |
 | `admin/facultades.vue` | `GET/POST/PATCH/DELETE /faculties` y `/schools` |
 | `admin/eventos.vue` | `GET/POST/PATCH/DELETE /events` |
-| `admin/disciplinas.vue` | `GET/POST/PATCH/DELETE /disciplines` (con filtros) |
-| `admin/inscripciones.vue` | `GET /registrations` con filtros (`status`, `eventId`, `disciplineId`, `isPaid`) y `phone` del equipo/delegado, `POST /registrations`, `PATCH /registrations/:id/approve\|reject`, `PATCH /vouchers/:id/validate`, `GET /disciplines`, `GET /academic/student` o `GET /academic/dni` (según `participantType`) |
+| `admin/disciplinas/index.vue` | `GET/POST/PATCH/DELETE /disciplines` (con filtros), cierre con `datetime-local`, puntaje configurable, muestra `teamsCount`; para `REFEREE` queda solo lectura con acceso a fixture |
+| `admin/disciplinas/[id]/fixture.vue` | `GET /disciplines/:id/fixture`, `POST /disciplines/:id/fixture/generate` (solo admin), `PATCH /matches/:id`, `PATCH /matches/:id/result` con autosave, `POST /disciplines/:id/standings/recalculate` (solo admin) |
+| `admin/inscripciones.vue` | `GET /registrations` con filtros (`status`, `eventId`, `disciplineId`, `isPaid`, `participantType`) y `phone` del equipo/delegado, `POST /registrations`, `PATCH /registrations/:id/approve\|reject`, `PATCH /vouchers/:id/validate`, `GET /disciplines`, `GET /academic/student` o `GET /academic/dni` (según `participantType`) |
+| `resultados/[id].vue` | `GET /standings/:disciplineId`; muestra tabla principal para puntos y llave responsive para eliminación |
 | `admin/vouchers.vue` | `GET /vouchers`, `PATCH /vouchers/:id/validate\|reject` (vista secundaria de compatibilidad) |
-| `admin/usuarios.vue` | `GET/POST /users`, `PATCH /users/:id`, `/users/:id/active`, `/users/:id/role` |
+| `admin/usuarios.vue` | `GET/POST /users`, `PATCH /users/:id`, `/users/:id/active`, `/users/:id/role`; incluye rol `REFEREE` |
 | `admin/dashboard.vue` | `GET /admin/dashboard` |
 
 > El contrato completo (bodies y reglas) está en el repo del backend:

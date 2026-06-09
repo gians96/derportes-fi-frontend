@@ -33,6 +33,11 @@ export const useAuthStore = defineStore('auth', {
       state.user?.role === 'ADMIN_SYSTEM' ||
       state.user?.role === 'OWNER_SYSTEM',
     isOwner: (state) => state.user?.role === 'OWNER_SYSTEM',
+    isReferee: (state) => state.user?.role === 'REFEREE',
+    canManageFixture: (state) =>
+      state.user?.role === 'ADMIN_SYSTEM' ||
+      state.user?.role === 'OWNER_SYSTEM' ||
+      state.user?.role === 'REFEREE',
     needsProfile: (state) =>
       (state.user?.role === 'STUDENT' &&
         (!state.user?.facultyId || !state.user?.schoolId)) ||

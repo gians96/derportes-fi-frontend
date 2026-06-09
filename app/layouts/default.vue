@@ -7,11 +7,11 @@
         class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6"
       >
         <NuxtLink to="/" class="flex items-center gap-3">
-          <div
-            class="rounded-lg border border-green-500/20 bg-green-500/10 px-2 py-2 shadow-lg shadow-green-950/40"
-          >
-            <Trophy class="h-5 w-5 text-green-400" />
-          </div>
+          <img
+            src="/es-undc.png"
+            alt="Universidad Nacional de Cañete"
+            class="h-10 w-auto"
+          />
           <div class="leading-tight">
             <p class="text-base font-bold text-white">
               Deportes <span class="text-green-400 glow-text">FI</span>
@@ -49,11 +49,11 @@
               Mis inscripciones
             </NuxtLink>
             <NuxtLink
-              v-if="auth.isAdmin"
-              to="/admin/dashboard"
+              v-if="auth.isAdmin || auth.isReferee"
+              :to="auth.isReferee ? '/admin/disciplinas' : '/admin/dashboard'"
               class="hidden rounded-lg bg-green-500/10 px-3 py-2 text-sm font-semibold text-green-300 transition hover:bg-green-500/20 sm:block"
             >
-              Panel admin
+              {{ auth.isReferee ? 'Panel árbitro' : 'Panel admin' }}
             </NuxtLink>
             <button
               class="rounded-lg border border-oscuro-700 px-3 py-2 text-sm font-semibold text-oscuro-200 transition hover:text-white"
@@ -96,7 +96,6 @@
 </template>
 
 <script setup lang="ts">
-import { Trophy } from 'lucide-vue-next'
 import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()

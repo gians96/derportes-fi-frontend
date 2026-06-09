@@ -3,6 +3,7 @@
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-bold text-white">Disciplinas</h1>
       <button
+        v-if="auth.isAdmin"
         class="rounded-lg bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 hover:bg-green-500/20"
         @click="openCreate"
       >
@@ -76,7 +77,7 @@
           <span class="text-sm text-oscuro-200">Cierre de inscripción</span>
           <input
             v-model="form.registrationDeadline"
-            type="date"
+            type="datetime-local"
             required
             class="input"
           />
@@ -101,6 +102,24 @@
           <span class="text-sm text-oscuro-200">Costo (S/)</span>
           <input v-model.number="form.cost" type="number" min="0" step="0.5" class="input" />
         </label>
+        <div v-if="form.format === 'POINTS'" class="grid gap-3 sm:col-span-2 sm:grid-cols-4">
+          <label class="block">
+            <span class="text-sm text-oscuro-200">Pts. victoria</span>
+            <input v-model.number="form.winPoints" type="number" min="0" class="input" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-oscuro-200">Pts. empate</span>
+            <input v-model.number="form.drawPoints" type="number" min="0" class="input" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-oscuro-200">Pts. derrota</span>
+            <input v-model.number="form.lossPoints" type="number" min="0" class="input" />
+          </label>
+          <label class="flex items-center gap-2 pt-6">
+            <input v-model="form.allowDraw" type="checkbox" class="h-4 w-4" />
+            <span class="text-sm text-oscuro-200">Permite empate</span>
+          </label>
+        </div>
         <div class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Bases / reglamento</span>
           <RichTextEditor
@@ -120,7 +139,7 @@
     </AppModal>
 
     <!-- Filtros -->
-    <div class="mt-6 grid gap-3 sm:grid-cols-3">
+    <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <label class="block">
         <span class="text-xs text-oscuro-400">Evento</span>
         <select v-model.number="filters.eventId" class="input">
@@ -148,11 +167,19 @@
           </option>
         </select>
       </label>
+      <label class="block">
+        <span class="text-xs text-oscuro-400">Cierre</span>
+        <select v-model="filters.deadline" class="input">
+          <option value="ALL">Todas</option>
+          <option value="OPEN">Inscripcion abierta</option>
+          <option value="CLOSED">Inscripcion cerrada</option>
+        </select>
+      </label>
     </div>
 
     <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <div
-        v-for="d in disciplines"
+        v-for="d in filteredDisciplines"
         :key="d.id"
         class="rounded-xl border border-oscuro-700 bg-oscuro-850 p-3 transition-all hover:border-green-700/40 hover:shadow-lg hover:shadow-green-900/10"
       >
@@ -185,12 +212,26 @@
               <p class="mt-1 text-xs text-oscuro-400">
                 {{ d.modality === 'TEAM' ? 'Equipos' : 'Individual' }} ·
                 {{ d.minPlayers }}-{{ d.maxPlayers }} jug. ·
+                Inscritos: {{ registeredTeamsLabel(d) }} equipos ·
                 {{ d.isPaid ? formatCurrency(d.cost) : 'Gratuito' }}
+              </p>
+              <p class="mt-1 text-xs text-oscuro-500">
+                Cierre: {{ formatDateTime(d.registrationDeadline) }} Â·
+                {{ d.format === 'POINTS' ? 'Puntos' : 'Eliminacion' }}
               </p>
             </div>
           </div>
           <div class="flex shrink-0 items-center gap-1">
+            <NuxtLink
+              :to="`/admin/disciplinas/${d.id}/fixture`"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-green-300 transition hover:bg-green-500/10"
+              title="Fixture / Resultados"
+              aria-label="Fixture / Resultados"
+            >
+              <Trophy class="h-4 w-4" />
+            </NuxtLink>
             <button
+              v-if="auth.isAdmin"
               type="button"
               class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sky-300 transition hover:bg-sky-500/10"
               title="Editar disciplina"
@@ -200,6 +241,7 @@
               <Pencil class="h-4 w-4" />
             </button>
             <button
+              v-if="auth.isAdmin"
               type="button"
               class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-400 transition hover:bg-red-500/10"
               title="Eliminar disciplina"
@@ -276,7 +318,7 @@
         </label>
         <label class="block">
           <span class="text-sm text-oscuro-200">Cierre de inscripción</span>
-          <input v-model="editForm.registrationDeadline" type="date" required class="input" />
+          <input v-model="editForm.registrationDeadline" type="datetime-local" required class="input" />
         </label>
         <label class="block">
           <span class="text-sm text-oscuro-200">Mín. jugadores</span>
@@ -298,6 +340,24 @@
           <span class="text-sm text-oscuro-200">Costo (S/)</span>
           <input v-model.number="editForm.cost" type="number" min="0" step="0.5" class="input" />
         </label>
+        <div v-if="editForm.format === 'POINTS'" class="grid gap-3 sm:col-span-2 sm:grid-cols-4">
+          <label class="block">
+            <span class="text-sm text-oscuro-200">Pts. victoria</span>
+            <input v-model.number="editForm.winPoints" type="number" min="0" class="input" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-oscuro-200">Pts. empate</span>
+            <input v-model.number="editForm.drawPoints" type="number" min="0" class="input" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-oscuro-200">Pts. derrota</span>
+            <input v-model.number="editForm.lossPoints" type="number" min="0" class="input" />
+          </label>
+          <label class="flex items-center gap-2 pt-6">
+            <input v-model="editForm.allowDraw" type="checkbox" class="h-4 w-4" />
+            <span class="text-sm text-oscuro-200">Permite empate</span>
+          </label>
+        </div>
         <div class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Bases / reglamento</span>
           <RichTextEditor
@@ -330,14 +390,21 @@
 </template>
 
 <script setup lang="ts">
-import { Pencil, Trash2 } from 'lucide-vue-next'
+import { Pencil, Trash2, Trophy } from 'lucide-vue-next'
 import type { Discipline, SportEvent } from '~/types/domain'
-import { formatCurrency } from '~/utils/format'
+import {
+  formatCurrency,
+  formatDateTime,
+  fromDateTimeLocalInput,
+  isDeadlinePassed,
+  toDateTimeLocalInput,
+} from '~/utils/format'
 import { SPORTS, getSportMeta } from '~/utils/sports'
 
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 
 const api = useApi()
+const auth = useAuthStore()
 const events = ref<SportEvent[]>([])
 const disciplines = ref<Discipline[]>([])
 const showForm = ref(false)
@@ -347,7 +414,16 @@ const filters = reactive({
   eventId: 0,
   facultyId: 0,
   schoolId: 0,
+  deadline: 'ALL' as 'ALL' | 'OPEN' | 'CLOSED',
 })
+
+const filteredDisciplines = computed(() =>
+  disciplines.value.filter((discipline) => {
+    if (filters.deadline === 'ALL') return true
+    const closed = isDeadlinePassed(discipline.registrationDeadline)
+    return filters.deadline === 'CLOSED' ? closed : !closed
+  }),
+)
 
 const filterSchools = computed(
   () => faculties.value.find((f) => f.id === filters.facultyId)?.schools ?? [],
@@ -379,6 +455,10 @@ const form = reactive({
   isPaid: false,
   cost: 0,
   rulesText: '',
+  winPoints: 3,
+  drawPoints: 1,
+  lossPoints: 0,
+  allowDraw: true,
 })
 
 async function load() {
@@ -404,7 +484,7 @@ async function loadDisciplines() {
 
 async function create() {
   try {
-    await api.post('/disciplines', form)
+    await api.post('/disciplines', disciplinePayload(form))
     showForm.value = false
     await load()
   } catch {
@@ -427,6 +507,10 @@ function resetForm() {
     isPaid: false,
     cost: 0,
     rulesText: '',
+    winPoints: 3,
+    drawPoints: 1,
+    lossPoints: 0,
+    allowDraw: true,
   })
 }
 
@@ -443,8 +527,16 @@ function showModalError(err: unknown, fallback: string) {
     fallback
 }
 
-function toDateInput(value: string) {
-  return value ? value.slice(0, 10) : ''
+function disciplinePayload<T extends { registrationDeadline: string }>(source: T) {
+  return {
+    ...source,
+    registrationDeadline: fromDateTimeLocalInput(source.registrationDeadline),
+  }
+}
+
+function registeredTeamsLabel(discipline: Discipline) {
+  const count = discipline.teamsCount ?? 0
+  return discipline.maxTeams > 0 ? `${count}/${discipline.maxTeams}` : String(count)
 }
 
 // --- Editar disciplina ---
@@ -464,6 +556,10 @@ const editForm = reactive({
   isPaid: false,
   cost: 0,
   rulesText: '',
+  winPoints: 3,
+  drawPoints: 1,
+  lossPoints: 0,
+  allowDraw: true,
 })
 
 function openEdit(d: Discipline) {
@@ -476,13 +572,17 @@ function openEdit(d: Discipline) {
     genderPolicy: d.genderPolicy,
     format: d.format,
     participantType: d.participantType,
-    registrationDeadline: toDateInput(d.registrationDeadline),
+    registrationDeadline: toDateTimeLocalInput(d.registrationDeadline),
     minPlayers: d.minPlayers,
     maxPlayers: d.maxPlayers,
     maxTeams: d.maxTeams,
     isPaid: d.isPaid,
     cost: d.cost,
     rulesText: d.rulesText ?? '',
+    winPoints: d.winPoints ?? 3,
+    drawPoints: d.drawPoints ?? 1,
+    lossPoints: d.lossPoints ?? 0,
+    allowDraw: d.allowDraw ?? true,
   })
   editOpen.value = true
 }
@@ -490,7 +590,7 @@ function openEdit(d: Discipline) {
 async function saveEdit() {
   modalError.value = ''
   try {
-    await api.patch(`/disciplines/${editId.value}`, { ...editForm })
+    await api.patch(`/disciplines/${editId.value}`, disciplinePayload(editForm))
     editOpen.value = false
     await load()
   } catch (err) {

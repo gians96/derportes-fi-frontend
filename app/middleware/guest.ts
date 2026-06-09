@@ -17,6 +17,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/admin/dashboard')
   }
 
+  if (auth.isReferee) {
+    return navigateTo('/admin/disciplinas')
+  }
+
   if (auth.needsProfile) {
     return navigateTo('/completar-perfil')
   }

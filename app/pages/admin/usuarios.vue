@@ -49,6 +49,7 @@
               >
                 <option value="STUDENT">Estudiante</option>
                 <option value="OTHER">Otro</option>
+                <option value="REFEREE">Árbitro</option>
                 <option v-if="auth.isOwner" value="ADMIN_SYSTEM">
                   Administrador
                 </option>
@@ -105,6 +106,7 @@
           <select v-model="createForm.role" class="input">
             <option value="STUDENT">Estudiante</option>
             <option value="OTHER">Otro</option>
+            <option value="REFEREE">Árbitro</option>
             <option v-if="auth.isOwner" value="ADMIN_SYSTEM">Administrador</option>
             <option v-if="auth.isOwner" value="OWNER_SYSTEM">Owner</option>
           </select>
@@ -113,7 +115,7 @@
           <span class="text-sm text-oscuro-200">DNI (opcional)</span>
           <input v-model="createForm.dni" class="input" />
         </label>
-        <label v-if="createForm.role !== 'OTHER'" class="block">
+        <label v-if="!isNonAcademicRole(createForm.role)" class="block">
           <span class="text-sm text-oscuro-200">Facultad (opcional)</span>
           <select v-model.number="createForm.facultyId" class="input">
             <option :value="0">Sin facultad</option>
@@ -122,7 +124,7 @@
             </option>
           </select>
         </label>
-        <label v-if="createForm.role !== 'OTHER'" class="block">
+        <label v-if="!isNonAcademicRole(createForm.role)" class="block">
           <span class="text-sm text-oscuro-200">Escuela (opcional)</span>
           <select v-model.number="createForm.schoolId" class="input">
             <option :value="0">Sin escuela</option>
@@ -159,7 +161,7 @@
           <span class="text-sm text-oscuro-200">DNI</span>
           <input v-model="editForm.dni" class="input" />
         </label>
-        <label v-if="editForm.role !== 'OTHER'" class="block">
+        <label v-if="!isNonAcademicRole(editForm.role)" class="block">
           <span class="text-sm text-oscuro-200">Facultad</span>
           <select v-model.number="editForm.facultyId" class="input">
             <option :value="0">Sin facultad</option>
@@ -168,7 +170,7 @@
             </option>
           </select>
         </label>
-        <label v-if="editForm.role !== 'OTHER'" class="block sm:col-span-2">
+        <label v-if="!isNonAcademicRole(editForm.role)" class="block sm:col-span-2">
           <span class="text-sm text-oscuro-200">Escuela</span>
           <select v-model.number="editForm.schoolId" class="input">
             <option :value="0">Sin escuela</option>
@@ -235,13 +237,17 @@ function showModalError(err: unknown, fallback: string) {
     fallback
 }
 
+function isNonAcademicRole(role: AuthUser['role']) {
+  return role === 'OTHER' || role === 'REFEREE'
+}
+
 // Un owner puede editar a cualquiera salvo otros owners.
 // Un admin solo puede editar usuarios no administrativos.
 function canEdit(u: AuthUser) {
   if (u.role === 'OWNER_SYSTEM') return false
   if (u.id === auth.user?.id) return false
   if (auth.isOwner) return true
-  return u.role === 'STUDENT' || u.role === 'OTHER'
+  return u.role === 'STUDENT' || u.role === 'OTHER' || u.role === 'REFEREE'
 }
 
 async function load() {
@@ -279,7 +285,7 @@ const createSchools = computed(() => schoolsOf(createForm.facultyId))
 watch(
   () => createForm.role,
   (role) => {
-    if (role === 'OTHER') {
+    if (isNonAcademicRole(role)) {
       createForm.facultyId = 0
       createForm.schoolId = 0
     }
@@ -313,8 +319,8 @@ async function createUser() {
       email: createForm.email,
       role: createForm.role,
       dni: createForm.dni || undefined,
-      facultyId: createForm.role === 'OTHER' ? undefined : createForm.facultyId || undefined,
-      schoolId: createForm.role === 'OTHER' ? undefined : createForm.schoolId || undefined,
+      facultyId: isNonAcademicRole(createForm.role) ? undefined : createForm.facultyId || undefined,
+      schoolId: isNonAcademicRole(createForm.role) ? undefined : createForm.schoolId || undefined,
     })
     createOpen.value = false
     await load()
@@ -338,7 +344,7 @@ const editSchools = computed(() => schoolsOf(editForm.facultyId))
 watch(
   () => editForm.role,
   (role) => {
-    if (role === 'OTHER') {
+    if (isNonAcademicRole(role)) {
       editForm.facultyId = 0
       editForm.schoolId = 0
     }
@@ -372,8 +378,8 @@ async function saveUser() {
       fullName: editForm.fullName,
       email: editForm.email,
       dni: editForm.dni || null,
-      facultyId: editForm.role === 'OTHER' ? null : editForm.facultyId || null,
-      schoolId: editForm.role === 'OTHER' ? null : editForm.schoolId || null,
+      facultyId: isNonAcademicRole(editForm.role) ? null : editForm.facultyId || null,
+      schoolId: isNonAcademicRole(editForm.role) ? null : editForm.schoolId || null,
     })
     editOpen.value = false
     await load()

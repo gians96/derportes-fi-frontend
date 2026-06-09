@@ -36,6 +36,21 @@ export function formatDateTime(value: string | Date): string {
   }).format(date)
 }
 
+export function toDateTimeLocalInput(value: string | Date): string {
+  const date = typeof value === 'string' ? new Date(value) : value
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (part: number) => String(part).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
+    date.getHours(),
+  )}:${pad(date.getMinutes())}`
+}
+
+export function fromDateTimeLocalInput(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toISOString()
+}
+
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('es-PE', {
     style: 'currency',

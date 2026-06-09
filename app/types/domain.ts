@@ -1,6 +1,6 @@
 // Tipos de dominio compartidos del frontend
 
-export type Role = 'OWNER_SYSTEM' | 'ADMIN_SYSTEM' | 'STUDENT' | 'OTHER'
+export type Role = 'OWNER_SYSTEM' | 'ADMIN_SYSTEM' | 'REFEREE' | 'STUDENT' | 'OTHER'
 
 export type Gender = 'M' | 'F' | 'O'
 
@@ -81,6 +81,10 @@ export interface Discipline {
   rulesText?: string | null
   extraInfo?: string | null
   registrationDeadline: string
+  winPoints: number
+  drawPoints: number
+  lossPoints: number
+  allowDraw: boolean
   teamsCount?: number
   event?: { id: number; name: string }
   teams?: DisciplineTeamSummary[]
@@ -177,6 +181,54 @@ export interface StandingRow {
   lost: number
   drawn: number
   points: number
+  goalsFor?: number
+  goalsAgainst?: number
+}
+
+export interface MatchSummary {
+  id: number
+  disciplineId: number
+  round: number
+  homeTeamId?: number | null
+  homeTeamName?: string | null
+  awayTeamId?: number | null
+  awayTeamName?: string | null
+  homeScore?: number | null
+  awayScore?: number | null
+  winnerTeamId?: number | null
+  winnerTeamName?: string | null
+  status: MatchStatus
+  scheduledAt?: string | null
+}
+
+export interface FixtureTeam {
+  id: number
+  name: string
+  cycle?: string | null
+  section?: string | null
+}
+
+export interface FixtureResponse {
+  discipline: Pick<
+    Discipline,
+    'id' | 'name' | 'format' | 'winPoints' | 'drawPoints' | 'lossPoints' | 'allowDraw'
+  >
+  approvedTeams: FixtureTeam[]
+  standings: StandingRow[]
+  matches: MatchSummary[]
+}
+
+export interface ResultsResponse {
+  disciplineName: string
+  format: CompetitionFormat
+  scoring: {
+    winPoints: number
+    drawPoints: number
+    lossPoints: number
+    allowDraw: boolean
+  }
+  standings: StandingRow[]
+  matches: MatchSummary[]
 }
 
 export interface AcademicStudent {

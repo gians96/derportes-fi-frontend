@@ -125,7 +125,7 @@ async function save() {
         ? { dni: form.dni }
         : { facultyId: form.facultyId, schoolId: form.schoolId },
     )
-    await navigateTo(auth.isAdmin ? '/admin/dashboard' : '/')
+    await navigateTo(auth.isAdmin ? '/admin/dashboard' : auth.isReferee ? '/admin/disciplinas' : '/')
   } catch (err: unknown) {
     error.value =
       (err as { data?: { message?: string } })?.data?.message ??

@@ -41,7 +41,7 @@
 
     <div class="mt-4 flex items-center justify-between">
       <span class="text-xs text-oscuro-400">
-        Cierre: {{ formatDateUtc(discipline.registrationDeadline) }}
+        Cierre: {{ formatDateTime(discipline.registrationDeadline) }}
       </span>
       <NuxtLink
         :to="`/disciplinas/${discipline.id}`"
@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import type { Discipline } from '~/types/domain'
-import { formatCurrency, formatDateUtc } from '~/utils/format'
+import { formatCurrency, formatDateTime } from '~/utils/format'
 import { participantTypeLabel } from '~/utils/participants'
 
 const props = defineProps<{ discipline: Discipline }>()

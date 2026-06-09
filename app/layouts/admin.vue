@@ -6,16 +6,18 @@
     >
       <div class="border-b border-oscuro-700 p-6">
         <div class="flex items-center gap-4">
-          <div
-            class="rounded-lg border border-green-500/20 bg-green-500/10 px-2 py-3 shadow-lg shadow-green-950/50"
-          >
-            <ShieldCheck class="h-5 w-5 text-green-400" />
-          </div>
+          <img
+            src="/es-undc.png"
+            alt="Universidad Nacional de Cañete"
+            class="h-10 w-auto shrink-0"
+          />
           <div>
             <h1 class="text-xl font-bold text-white">
-              FI <span class="text-green-400 glow-text">Admin</span>
+              FI <span class="text-green-400 glow-text">{{ auth.isReferee ? 'Árbitro' : 'Admin' }}</span>
             </h1>
-            <p class="text-sm text-oscuro-300">Panel de control</p>
+            <p class="text-sm text-oscuro-300">
+              {{ auth.isReferee ? 'Gestión de fixture' : 'Panel de control' }}
+            </p>
           </div>
         </div>
       </div>
@@ -95,7 +97,6 @@ import {
   CalendarRange,
   Users,
   Trophy,
-  ShieldCheck,
   ExternalLink,
   Power,
   Building2,
@@ -106,7 +107,7 @@ import { useAuthStore } from '~/stores/auth'
 const auth = useAuthStore()
 const route = useRoute()
 
-const menuItems = [
+const adminMenuItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/facultades', label: 'Facultades', icon: GraduationCap },
   { to: '/admin/eventos', label: 'Eventos', icon: CalendarRange },
@@ -115,8 +116,14 @@ const menuItems = [
   { to: '/admin/usuarios', label: 'Usuarios', icon: Building2 },
 ]
 
+const refereeMenuItems = [
+  { to: '/admin/disciplinas', label: 'Disciplinas', icon: Trophy },
+]
+
+const menuItems = computed(() => (auth.isReferee ? refereeMenuItems : adminMenuItems))
+
 const pageTitle = computed(() => {
-  const current = menuItems.find((i) => route.path.startsWith(i.to))
+  const current = menuItems.value.find((i) => route.path.startsWith(i.to))
   return current?.label ?? 'Administración'
 })
 </script>

@@ -45,7 +45,15 @@ async function onSuccess() {
     await navigateTo('/completar-perfil')
     return
   }
-  await navigateTo(auth.isAdmin ? '/admin/dashboard' : redirect)
+  if (auth.isAdmin) {
+    await navigateTo('/admin/dashboard')
+    return
+  }
+  if (auth.isReferee) {
+    await navigateTo('/admin/disciplinas')
+    return
+  }
+  await navigateTo(redirect)
 }
 
 function onError(message: string) {

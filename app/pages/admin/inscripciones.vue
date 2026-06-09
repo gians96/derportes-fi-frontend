@@ -47,7 +47,7 @@
       </button>
     </div>
 
-    <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
       <label class="block">
         <span class="text-xs text-oscuro-400">Evento</span>
         <select v-model.number="adv.eventId" class="input">
@@ -82,6 +82,14 @@
           <option v-for="discipline in disciplines" :key="discipline.id" :value="discipline.id">
             {{ discipline.name }}
           </option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="text-xs text-oscuro-400">Tipo de participante</span>
+        <select v-model="adv.participantType" class="input">
+          <option value="ALL">Todos</option>
+          <option value="STUDENT">Solo estudiantes</option>
+          <option value="OTHER">Otros</option>
         </select>
       </label>
     </div>
@@ -384,14 +392,14 @@
           >
             <input
               v-model="registrationRejectReason"
-              placeholder="Motivo de rechazo de inscripciÃ³n"
+              placeholder="Motivo de rechazo de inscripción"
               class="min-w-0 rounded-lg border border-oscuro-700 bg-oscuro-900/60 px-3 py-2 text-sm text-white"
             />
             <button
               class="rounded-lg bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/25"
               @click="rejectReview"
             >
-              Rechazar inscripciÃ³n
+              Rechazar inscripción
             </button>
             <button
               class="rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-oscuro-900 hover:bg-green-400 disabled:opacity-50"
@@ -584,6 +592,7 @@ import type {
   AuthUser,
   Discipline,
   Participant,
+  ParticipantType,
   RegistrationStatus,
   SportEvent,
   Team,
@@ -615,6 +624,7 @@ const adv = reactive({
   facultyId: 0,
   schoolId: 0,
   disciplineId: 0,
+  participantType: 'ALL' as ParticipantType | 'ALL',
 })
 
 const filterSchools = computed(
@@ -629,7 +639,7 @@ watch(
 )
 
 watch(
-  () => [adv.eventId, adv.facultyId, adv.schoolId, adv.disciplineId],
+  () => [adv.eventId, adv.facultyId, adv.schoolId, adv.disciplineId, adv.participantType],
   () => {
     loadTeams()
     loadDisciplines()
@@ -708,13 +718,14 @@ function voucherBadge(team: Team) {
 }
 
 async function loadTeams() {
-  const query: Record<string, number | boolean> = {}
+  const query: Record<string, number | boolean | ParticipantType> = {}
   if (paymentFilter.value === 'FREE') query.isPaid = false
   if (paymentFilter.value === 'PAID') query.isPaid = true
   if (adv.eventId) query.eventId = adv.eventId
   if (adv.facultyId) query.facultyId = adv.facultyId
   if (adv.schoolId) query.schoolId = adv.schoolId
   if (adv.disciplineId) query.disciplineId = adv.disciplineId
+  if (adv.participantType !== 'ALL') query.participantType = adv.participantType
   try {
     teams.value = await api.get<Team[]>('/registrations', query)
   } catch {
