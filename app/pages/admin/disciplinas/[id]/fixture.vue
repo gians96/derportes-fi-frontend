@@ -60,6 +60,74 @@
         </div>
 
         <div
+          v-if="
+            auth.isAdmin &&
+            fixture.discipline.format === 'ELIMINATION' &&
+            manualOrder.length >= 2
+          "
+          class="rounded-xl border border-oscuro-700 bg-oscuro-850 p-4"
+        >
+          <h2 class="font-bold text-white">Sorteo manual</h2>
+          <p class="mt-1 text-xs text-oscuro-400">
+            Reordena los equipos para definir manualmente las llaves de la primera ronda.
+            Solo se puede aplicar antes de jugar partidos.
+          </p>
+          <ol class="mt-3 space-y-2">
+            <li
+              v-for="(team, idx) in manualOrder"
+              :key="team.id"
+              class="flex items-center gap-2 rounded-lg bg-oscuro-900/60 px-3 py-2 text-sm"
+            >
+              <span class="w-5 shrink-0 text-xs text-oscuro-500">{{ idx + 1 }}</span>
+              <span class="min-w-0 flex-1 truncate text-oscuro-100">{{ team.name }}</span>
+              <button
+                type="button"
+                class="inline-flex h-7 w-7 items-center justify-center rounded-md text-oscuro-300 transition hover:bg-oscuro-800 disabled:opacity-30"
+                :disabled="idx === 0"
+                title="Subir"
+                @click="moveTeam(idx, -1)"
+              >
+                <ChevronUp class="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                class="inline-flex h-7 w-7 items-center justify-center rounded-md text-oscuro-300 transition hover:bg-oscuro-800 disabled:opacity-30"
+                :disabled="idx === manualOrder.length - 1"
+                title="Bajar"
+                @click="moveTeam(idx, 1)"
+              >
+                <ChevronDown class="h-4 w-4" />
+              </button>
+            </li>
+          </ol>
+
+          <p class="mt-4 text-xs font-semibold uppercase tracking-normal text-oscuro-300">
+            Enfrentamientos resultantes
+          </p>
+          <ul class="mt-2 space-y-1 text-xs text-oscuro-300">
+            <li
+              v-for="(pair, i) in previewPairs"
+              :key="i"
+              class="rounded-md bg-oscuro-900/40 px-2 py-1"
+            >
+              {{ pair.home }} <span class="text-oscuro-500">vs</span> {{ pair.away }}
+            </li>
+          </ul>
+
+          <button
+            type="button"
+            class="mt-3 w-full rounded-lg bg-green-500 px-3 py-2 text-sm font-semibold text-oscuro-900 transition hover:bg-green-400 disabled:opacity-50"
+            :disabled="arranging || generating || hasPlayedMatches || !orderChanged"
+            @click="askArrange"
+          >
+            Aplicar sorteo manual
+          </button>
+          <p v-if="hasPlayedMatches" class="mt-2 text-xs text-yellow-300">
+            Hay partidos jugados: regenera el fixture para volver a sortear.
+          </p>
+        </div>
+
+        <div
           v-if="fixture.discipline.format === 'POINTS'"
           class="rounded-xl border border-oscuro-700 bg-oscuro-850 p-4"
         >
@@ -129,9 +197,9 @@
               <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="min-w-0">
                   <p class="font-semibold text-white">
-                    {{ teamLabel(match.homeTeamName) }}
+                    {{ slotLabel(match, 'home') }}
                     <span class="text-oscuro-500">vs</span>
-                    {{ teamLabel(match.awayTeamName) }}
+                    {{ slotLabel(match, 'away') }}
                   </p>
                   <p class="mt-1 text-xs text-oscuro-400">
                     {{ match.scheduledAt ? formatDateTime(match.scheduledAt) : 'Sin horario' }}
@@ -217,12 +285,27 @@
       :error="error"
       @confirm="generateFixture"
     />
+
+    <AppConfirm
+      v-model="confirmArrangeOpen"
+      title="Aplicar sorteo manual"
+      message="Se reemplazarán las llaves actuales con el orden que definiste."
+      confirm-text="Aplicar"
+      :loading="arranging"
+      :error="error"
+      @confirm="arrangeFixture"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ChevronLeft } from 'lucide-vue-next'
-import type { FixtureResponse, MatchStatus, MatchSummary } from '~/types/domain'
+import { ChevronDown, ChevronLeft, ChevronUp } from 'lucide-vue-next'
+import type {
+  FixtureResponse,
+  FixtureTeam,
+  MatchStatus,
+  MatchSummary,
+} from '~/types/domain'
 import {
   formatDateTime,
   fromDateTimeLocalInput,
@@ -245,8 +328,12 @@ const disciplineId = Number(route.params.id)
 const fixture = ref<FixtureResponse | null>(null)
 const loading = ref(false)
 const generating = ref(false)
+const arranging = ref(false)
 const error = ref('')
 const confirmGenerateOpen = ref(false)
+const confirmArrangeOpen = ref(false)
+const manualOrder = ref<FixtureTeam[]>([])
+const baselineOrderIds = ref<number[]>([])
 
 const scoreTimers: Record<number, ReturnType<typeof setTimeout> | undefined> = {}
 const lastSavedScores = reactive<Record<number, string>>({})
@@ -282,6 +369,64 @@ const generateMessage = computed(() =>
     : 'Se reemplazarán los partidos pendientes actuales con un fixture nuevo.',
 )
 
+const previewPairs = computed(() => {
+  const teams = manualOrder.value
+  if (teams.length < 2) return [] as { home: string; away: string }[]
+  const pairs: { home: string; away: string }[] = []
+  for (let i = 0; i < teams.length; i += 2) {
+    const home = teams[i]
+    const away = teams[i + 1]
+    if (home && away) {
+      pairs.push({ home: home.name, away: away.name })
+    } else {
+      pairs.push({ home: home.name, away: 'Bye (pasa directo)' })
+    }
+  }
+  return pairs
+})
+
+const orderChanged = computed(() => {
+  const ids = manualOrder.value.map((t) => t.id)
+  return (
+    ids.length !== baselineOrderIds.value.length ||
+    ids.some((id, i) => id !== baselineOrderIds.value[i])
+  )
+})
+
+function deriveSeedOrder(): FixtureTeam[] | null {
+  if (fixture.value?.discipline.format !== 'ELIMINATION') return null
+  const teams = fixture.value?.approvedTeams ?? []
+  const round1 = (fixture.value?.matches ?? [])
+    .filter((m) => m.round === 1)
+    .sort((a, b) => a.id - b.id)
+  if (!round1.length || !teams.length) return null
+
+  const byId = new Map(teams.map((t) => [t.id, t]))
+  const result: FixtureTeam[] = []
+  for (const match of round1) {
+    const home = match.homeTeamId != null ? byId.get(match.homeTeamId) : undefined
+    if (home) result.push(home)
+    const away = match.awayTeamId != null ? byId.get(match.awayTeamId) : undefined
+    if (away) result.push(away)
+  }
+  return result.length === teams.length ? result : null
+}
+
+function initManualOrder() {
+  const derived = deriveSeedOrder() ?? [...(fixture.value?.approvedTeams ?? [])]
+  manualOrder.value = derived
+  baselineOrderIds.value = derived.map((t) => t.id)
+}
+
+function moveTeam(index: number, direction: -1 | 1) {
+  const target = index + direction
+  if (target < 0 || target >= manualOrder.value.length) return
+  const next = [...manualOrder.value]
+  const [moved] = next.splice(index, 1)
+  next.splice(target, 0, moved)
+  manualOrder.value = next
+}
+
 async function loadFixture() {
   loading.value = true
   error.value = ''
@@ -309,6 +454,7 @@ function syncMatchForms() {
     lastSavedScores[match.id] = scoreKey(String(homeScore), String(awayScore))
     scoreStates[match.id] ??= { state: 'idle' }
   }
+  initManualOrder()
 }
 
 function askGenerate() {
@@ -336,6 +482,31 @@ async function generateFixture() {
       (err as { data?: { message?: string } })?.data?.message ?? 'No se pudo generar el fixture.'
   } finally {
     generating.value = false
+  }
+}
+
+function askArrange() {
+  error.value = ''
+  confirmArrangeOpen.value = true
+}
+
+async function arrangeFixture() {
+  if (!auth.isAdmin) return
+  arranging.value = true
+  error.value = ''
+  try {
+    fixture.value = await api.post<FixtureResponse>(
+      `/disciplines/${disciplineId}/fixture/arrange`,
+      { teamOrder: manualOrder.value.map((t) => t.id) },
+    )
+    confirmArrangeOpen.value = false
+    syncMatchForms()
+  } catch (err) {
+    error.value =
+      (err as { data?: { message?: string } })?.data?.message ??
+      'No se pudo aplicar el sorteo manual.'
+  } finally {
+    arranging.value = false
   }
 }
 
@@ -422,6 +593,13 @@ function isScoreValue(value: string) {
 
 function teamLabel(name?: string | null) {
   return name || 'Por definir'
+}
+
+function slotLabel(match: MatchSummary, side: 'home' | 'away') {
+  const name = side === 'home' ? match.homeTeamName : match.awayTeamName
+  if (name) return name
+  if (match.status === 'PLAYED' && match.winnerTeamId != null) return 'Libre (bye)'
+  return 'Por definir'
 }
 
 function roundTitle(round: number) {

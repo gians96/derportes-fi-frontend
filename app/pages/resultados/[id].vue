@@ -111,11 +111,11 @@
                       {{ match.scheduledAt ? formatDateTime(match.scheduledAt) : 'Sin horario' }}
                     </p>
                     <div class="team-line" :class="{ winner: match.winnerTeamId === match.homeTeamId }">
-                      <span>{{ teamLabel(match.homeTeamName) }}</span>
+                      <span>{{ slotLabel(match, 'home') }}</span>
                       <strong>{{ match.homeScore ?? '-' }}</strong>
                     </div>
                     <div class="team-line" :class="{ winner: match.winnerTeamId === match.awayTeamId }">
-                      <span>{{ teamLabel(match.awayTeamName) }}</span>
+                      <span>{{ slotLabel(match, 'away') }}</span>
                       <strong>{{ match.awayScore ?? '-' }}</strong>
                     </div>
                     <p class="mt-2 text-[11px] font-semibold text-oscuro-400">
@@ -147,11 +147,11 @@
                   {{ match.scheduledAt ? formatDateTime(match.scheduledAt) : 'Sin horario' }}
                 </p>
                 <div class="team-line" :class="{ winner: match.winnerTeamId === match.homeTeamId }">
-                  <span>{{ teamLabel(match.homeTeamName) }}</span>
+                  <span>{{ slotLabel(match, 'home') }}</span>
                   <strong>{{ match.homeScore ?? '-' }}</strong>
                 </div>
                 <div class="team-line" :class="{ winner: match.winnerTeamId === match.awayTeamId }">
-                  <span>{{ teamLabel(match.awayTeamName) }}</span>
+                  <span>{{ slotLabel(match, 'away') }}</span>
                   <strong>{{ match.awayScore ?? '-' }}</strong>
                 </div>
                 <p class="mt-2 text-[11px] font-semibold text-oscuro-400">
@@ -178,9 +178,9 @@
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <p class="font-semibold text-white">
-                {{ teamLabel(match.homeTeamName) }}
+                {{ slotLabel(match, 'home') }}
                 <span class="text-oscuro-500">vs</span>
-                {{ teamLabel(match.awayTeamName) }}
+                {{ slotLabel(match, 'away') }}
               </p>
               <p class="mt-1 text-xs text-oscuro-400">
                 {{ data.format === 'POINTS' ? 'Fecha' : 'Ronda' }} {{ match.round }} ·
@@ -243,8 +243,11 @@ onMounted(async () => {
   }
 })
 
-function teamLabel(name?: string | null) {
-  return name || 'Por definir'
+function slotLabel(match: MatchSummary, side: 'home' | 'away') {
+  const name = side === 'home' ? match.homeTeamName : match.awayTeamName
+  if (name) return name
+  if (match.status === 'PLAYED' && match.winnerTeamId != null) return 'Libre (bye)'
+  return 'Por definir'
 }
 
 function scoreLabel(match: MatchSummary) {

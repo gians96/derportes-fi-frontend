@@ -212,7 +212,7 @@
               <p class="mt-1 text-xs text-oscuro-400">
                 {{ d.modality === 'TEAM' ? 'Equipos' : 'Individual' }} ·
                 {{ d.minPlayers }}-{{ d.maxPlayers }} jug. ·
-                Inscritos: {{ registeredTeamsLabel(d) }} equipos ·
+                Aprobados: {{ registeredTeamsLabel(d) }} equipos ·
                 {{ d.isPaid ? formatCurrency(d.cost) : 'Gratuito' }}
               </p>
               <p class="mt-1 text-xs text-oscuro-500">
