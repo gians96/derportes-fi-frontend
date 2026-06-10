@@ -95,6 +95,7 @@
 import {
   LayoutDashboard,
   CalendarRange,
+  CalendarClock,
   Users,
   Trophy,
   ExternalLink,
@@ -112,6 +113,7 @@ const adminMenuItems = [
   { to: '/admin/facultades', label: 'Facultades', icon: GraduationCap },
   { to: '/admin/eventos', label: 'Eventos', icon: CalendarRange },
   { to: '/admin/disciplinas', label: 'Disciplinas', icon: Trophy },
+  { to: '/admin/programacion', label: 'Programación', icon: CalendarClock },
   { to: '/admin/inscripciones', label: 'Equipos', icon: Users },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Building2 },
 ]

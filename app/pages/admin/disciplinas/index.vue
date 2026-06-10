@@ -94,6 +94,14 @@
           <span class="text-sm text-oscuro-200">Máx. equipos</span>
           <input v-model.number="form.maxTeams" type="number" min="0" class="input" />
         </label>
+        <label class="block">
+          <span class="text-sm text-oscuro-200">Duración por partido (min)</span>
+          <input v-model.number="form.matchDurationMinutes" type="number" min="1" class="input" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-oscuro-200">Lozas / canchas</span>
+          <input v-model.number="form.courtsCount" type="number" min="1" class="input" />
+        </label>
         <label class="flex items-center gap-2 pt-6">
           <input v-model="form.isPaid" type="checkbox" class="h-4 w-4" />
           <span class="text-sm text-oscuro-200">Inscripción con costo</span>
@@ -332,6 +340,14 @@
           <span class="text-sm text-oscuro-200">Máx. equipos</span>
           <input v-model.number="editForm.maxTeams" type="number" min="0" class="input" />
         </label>
+        <label class="block">
+          <span class="text-sm text-oscuro-200">Duración por partido (min)</span>
+          <input v-model.number="editForm.matchDurationMinutes" type="number" min="1" class="input" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-oscuro-200">Lozas / canchas</span>
+          <input v-model.number="editForm.courtsCount" type="number" min="1" class="input" />
+        </label>
         <label class="flex items-center gap-2 pt-6">
           <input v-model="editForm.isPaid" type="checkbox" class="h-4 w-4" />
           <span class="text-sm text-oscuro-200">Inscripción con costo</span>
@@ -459,6 +475,8 @@ const form = reactive({
   drawPoints: 1,
   lossPoints: 0,
   allowDraw: true,
+  matchDurationMinutes: 30,
+  courtsCount: 1,
 })
 
 async function load() {
@@ -511,6 +529,8 @@ function resetForm() {
     drawPoints: 1,
     lossPoints: 0,
     allowDraw: true,
+    matchDurationMinutes: 30,
+    courtsCount: 1,
   })
 }
 
@@ -560,6 +580,8 @@ const editForm = reactive({
   drawPoints: 1,
   lossPoints: 0,
   allowDraw: true,
+  matchDurationMinutes: 30,
+  courtsCount: 1,
 })
 
 function openEdit(d: Discipline) {
@@ -583,6 +605,8 @@ function openEdit(d: Discipline) {
     drawPoints: d.drawPoints ?? 1,
     lossPoints: d.lossPoints ?? 0,
     allowDraw: d.allowDraw ?? true,
+    matchDurationMinutes: d.matchDurationMinutes ?? 30,
+    courtsCount: d.courtsCount ?? 1,
   })
   editOpen.value = true
 }

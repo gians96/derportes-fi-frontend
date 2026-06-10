@@ -85,6 +85,8 @@ export interface Discipline {
   drawPoints: number
   lossPoints: number
   allowDraw: boolean
+  matchDurationMinutes: number
+  courtsCount: number
   teamsCount?: number
   event?: { id: number; name: string }
   teams?: DisciplineTeamSummary[]
@@ -235,4 +237,33 @@ export interface AcademicStudent {
   fullName: string
   studentCode: string | null
   dni: string | null
+}
+
+export interface ScheduledMatch {
+  matchId: number
+  disciplineId: number
+  disciplineName: string
+  round: number
+  homeTeamId: number
+  homeTeamName: string
+  awayTeamId: number
+  awayTeamName: string
+  slot: number
+  court: number
+  scheduledAt: string
+}
+
+export interface ScheduleRoundOneResponse {
+  applied: boolean
+  startAt: string
+  slotMinutes: number
+  slotsUsed: number
+  totalMatches: number
+  disciplines: {
+    id: number
+    name: string
+    courtsCount: number
+    matchDurationMinutes: number
+  }[]
+  matches: ScheduledMatch[]
 }
