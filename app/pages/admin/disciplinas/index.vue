@@ -239,6 +239,15 @@
               <Trophy class="h-4 w-4" />
             </NuxtLink>
             <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-amber-300 transition hover:bg-amber-500/10"
+              title="Imprimir fixture"
+              aria-label="Imprimir fixture"
+              @click="openPrint(d)"
+            >
+              <Printer class="h-4 w-4" />
+            </button>
+            <button
               v-if="auth.isAdmin"
               type="button"
               class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sky-300 transition hover:bg-sky-500/10"
@@ -406,7 +415,7 @@
 </template>
 
 <script setup lang="ts">
-import { Pencil, Trash2, Trophy } from 'lucide-vue-next'
+import { Pencil, Printer, Trash2, Trophy } from 'lucide-vue-next'
 import type { Discipline, SportEvent } from '~/types/domain'
 import {
   formatCurrency,
@@ -557,6 +566,11 @@ function disciplinePayload<T extends { registrationDeadline: string }>(source: T
 function registeredTeamsLabel(discipline: Discipline) {
   const count = discipline.teamsCount ?? 0
   return discipline.maxTeams > 0 ? `${count}/${discipline.maxTeams}` : String(count)
+}
+
+function openPrint(discipline: Discipline) {
+  const view = discipline.format === 'POINTS' ? 'rounds' : 'bracket'
+  window.open(`/admin/disciplinas/${discipline.id}/fixture-print?view=${view}`, '_blank')
 }
 
 // --- Editar disciplina ---
